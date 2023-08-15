@@ -1,0 +1,25 @@
+﻿[
+  {
+    "Offset": {
+      "X": 0,
+      "Y": 0
+    },
+    "Texture": "animation practice w gun-Sheet.png",
+    "FrameRatio": 0,
+    "FrameIndex": 0,
+    "_animations": [
+      {
+        "key": "stand down",
+        "value": {
+          "EndAction":  ""
+          "Frames": []
+        }
+      }
+    ]
+  },
+  {
+    "name": "Basic Science",
+    "creditUnits": 4,
+    "numberOfStudents": 35
+  }
+]

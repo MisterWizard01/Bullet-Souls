@@ -2,9 +2,9 @@
 
 namespace Engine
 {
-    public interface iComponent
+    public interface IComponent
     {
-        public void Update(int frameNumber, InputState keyboardState);
+        public void Update(int frameNumber, InputState inputState);
 
         public void Draw(SpriteBatch spriteBatch);
     }
