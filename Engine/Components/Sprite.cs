@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,23 +12,45 @@ namespace Engine.Components;
 
 public class Sprite : IComponent
 {
-    private Dictionary<string, Animation> _animations;
 
     public Vector2 Offset { get; set; }
+    public string TextureName { get; set; }
+    public Dictionary<string, Animation> Animations { get; set; }
+
+    [JsonIgnore]
     public Texture2D Texture { get; set; }
-    public float FrameRatio { get; set; }
-    public float FrameIndex { get; set; }
+    [JsonIgnore]
     public Animation? CurrentAnimation { get; set; }
+    [JsonIgnore]
+    public float FrameRatio { get; set; }
+    [JsonIgnore]
+    public float FrameIndex { get; set; }
+    [JsonIgnore]
     public Color BlendColor { get; set; }
 
-    public Frame? CurrentFrame => CurrentAnimation?.Frames[(int)FrameIndex];
-    public int Width { get => CurrentFrame?.Destination.Width ?? -1; }
-    public int Height { get => CurrentFrame?.Destination.Height ?? -1; }
+    [JsonIgnore]
+    public Point Size { get => CurrentAnimation?.Size ?? new(-1, -1); }
+    //[JsonIgnore]
+    //public int Width { get => CurrentAnimation?.Width ?? -1; }
+    //[JsonIgnore]
+    //public int Height { get => CurrentAnimation?.Height ?? -1; }
 
     public Sprite(Texture2D texture, float frameRatio = 1, float startIndex = 0)
     {
-        _animations = new Dictionary<string, Animation>();
+        Animations = new Dictionary<string, Animation>();
         Texture = texture;
+        TextureName = texture.Name;
+        FrameIndex = startIndex;
+        FrameRatio = frameRatio;
+        BlendColor = Color.White;
+        Offset = Vector2.Zero;
+    }
+
+    [JsonConstructor]
+    public Sprite(string texturePath, Vector2 offset, Color blendColor, float frameRatio = 1, float startIndex = 0)
+    {
+        Animations = new Dictionary<string, Animation>();
+        TextureName = texturePath;
         FrameIndex = startIndex;
         FrameRatio = frameRatio;
         BlendColor = Color.White;
@@ -70,26 +93,25 @@ public class Sprite : IComponent
 
     public void Draw(SpriteBatch spriteBatch)
     {
-        if (CurrentFrame == null)
+        if (CurrentAnimation == null)
         {
             return;
         }
 
-        var frame = CurrentFrame.Value;
-        var finalDestination = new Rectangle(
-            (int)(Offset.X + frame.Destination.X - frame.Destination.Width / 2.0f),
-            (int)(Offset.Y + frame.Destination.Y - frame.Destination.Height / 2.0f),
-            frame.Destination.Width,
-            frame.Destination.Height
+        var source = CurrentAnimation[(int)FrameIndex];
+        var destination = new Rectangle(
+            (int)(Offset.X - CurrentAnimation.Size.X / 2.0f),
+            (int)(Offset.Y - CurrentAnimation.Size.Y / 2.0f),
+            CurrentAnimation.Size.X, CurrentAnimation.Size.Y
         );
-        spriteBatch.Draw(Texture, finalDestination, frame.Source, BlendColor);
+        spriteBatch.Draw(Texture, destination, source, BlendColor);
     }
 
     public void SetAnimation(string name)
     {
-        if (_animations.ContainsKey(name))
+        if (Animations.ContainsKey(name))
         {
-            CurrentAnimation = _animations[name];
+            CurrentAnimation = Animations[name];
         }
         else
         {
@@ -98,32 +120,14 @@ public class Sprite : IComponent
         }
     }
 
-    public Animation AddAnimation(string name, List<Rectangle> destinations, List<Rectangle> sources, AnimationEndAction endAction = AnimationEndAction.Cycle)
+    public Animation AddAnimation(string name, List<Point> sources, AnimationEndAction endAction = AnimationEndAction.Cycle)
     {
-        if (destinations.Count != sources.Count)
+        var animation = new Animation()
         {
-            throw new ArgumentException("Destination and source arrays must have the same length.");
-        }
-
-        var animation = new Animation();
-        for (int i = 0; i < destinations.Count; i++)
-        {
-            animation.Frames.Add(new Frame(destinations[i], sources[i]));
-        }
-        animation.EndAction = endAction;
-        _animations.Add(name, animation);
-        return animation;
-    }
-
-    public Animation AddAnimation(string name, List<Rectangle> sources, AnimationEndAction endAction = AnimationEndAction.Cycle)
-    {
-        var animation = new Animation();
-        for (int i = 0; i < sources.Count; i++)
-        {
-            animation.Frames.Add(new Frame(sources[i]));
-        }
-        animation.EndAction = endAction;
-        _animations.Add(name, animation);
+            Frames = sources,
+            EndAction = endAction,
+        };
+        Animations.Add(name, animation);
         return animation;
     }
 }

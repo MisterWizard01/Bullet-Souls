@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Engine;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -9,6 +10,8 @@ namespace Rendering_Proto
     {
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
+
+        private SpriteManager _spriteManager;
 
         private Texture2D _texture;
         private Rectangle _viewRect, _camera;
@@ -25,6 +28,8 @@ namespace Rendering_Proto
 
             _camera = new Rectangle(0, 0, 192, 144);
             OnResizeWindow(null, null);
+
+            _spriteManager = new();
         }
 
         protected override void Initialize()
@@ -39,6 +44,7 @@ namespace Rendering_Proto
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
             _texture = Content.Load<Texture2D>("Bullet Souls mockup 1");
+            _spriteManager.LoadSprites("Data.json");
         }
 
         protected override void Update(GameTime gameTime)

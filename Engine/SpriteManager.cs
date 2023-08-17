@@ -11,7 +11,7 @@ namespace Engine;
 
 public class SpriteManager
 {
-    public List<Sprite> Sprites { get; set; }
+    public Dictionary<string, Sprite> Sprites { get; set; }
 
     public SpriteManager()
     {
@@ -22,8 +22,8 @@ public class SpriteManager
     {
         using StreamReader reader = new(filePath);
         var json = reader.ReadToEnd();
-        var sprites = JsonConvert.DeserializeObject<List<Sprite>>(json);
-        if (sprites != null)
+        var sprites = JsonConvert.DeserializeObject<Dictionary<string, Sprite>>(json);
+        if (sprites == null)
         {
             Debug.WriteLine("Could not read JSON sprite file.");
             return;
