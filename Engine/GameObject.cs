@@ -4,7 +4,7 @@ namespace Engine;
 
 public class GameObject
 {
-    public List<IComponent> Components;
+    public List<iComponent> Components;
 
     public GameObject()
     {
