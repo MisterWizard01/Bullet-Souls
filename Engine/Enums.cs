@@ -31,4 +31,12 @@
         HorizontalFacing,
         VerticalFacing,
     }
+
+    public enum AnimationEndAction
+    {
+        Stop,
+        Cycle,
+        PingPong,
+        Reverse,
+    }
 }

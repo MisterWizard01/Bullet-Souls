@@ -66,7 +66,7 @@ public class SpriteManager
         }
     }
 
-    public void DrawSprite(SpriteBatch spriteBatch, SpriteComponent sc)
+    public void DrawSprite(SpriteBatch spriteBatch, Camera camera, SpriteComponent sc)
     {
         if (sc.SpriteName == null)
         {
@@ -76,6 +76,11 @@ public class SpriteManager
         if (!Sprites.TryGetValue(sc.SpriteName, out var sprite))
         {
             Debug.WriteLine("Tried to draw unknown sprite '" + sc.SpriteName + "'.");
+            return;
+        }
+        if (sprite.Texture == null)
+        {
+            Debug.WriteLine("Tried to draw sprite with null texture.");
             return;
         }
 
@@ -90,6 +95,6 @@ public class SpriteManager
             (int)(sc.Offset.Y - animation.Size.Y / 2.0f),
             animation.Size.X, animation.Size.Y
         );
-        spriteBatch.Draw(sprite.Texture, destination, source, sc.BlendColor);
+        camera.Draw(spriteBatch, sprite.Texture, destination, source, sc.BlendColor);
     }
 }

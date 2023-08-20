@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rendering Proto", "Rendering Proto\Rendering Proto.csproj", "{9D8708A9-FC04-46AF-8100-B9CB66205300}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenderingProto", "Rendering Proto\RenderingProto.csproj", "{9D8708A9-FC04-46AF-8100-B9CB66205300}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine", "Engine\Engine.csproj", "{900E9666-77B6-43B7-9915-A35174088CA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpriteBuilder", "SpriteBuilder\SpriteBuilder.csproj", "{CC75F95A-978A-4B5E-AB76-2263C8954D51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteBuilder", "SpriteBuilder\SpriteBuilder.csproj", "{CC75F95A-978A-4B5E-AB76-2263C8954D51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

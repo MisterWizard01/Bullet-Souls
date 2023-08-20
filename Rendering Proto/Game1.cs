@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
@@ -17,9 +16,10 @@ public class Game1 : Game
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    private Texture2D _background, _tinyMonoTexture, _mostlySansTexture, _blockySansTexture, _whitePixel;
-    private SpriteFont _tinyMono, _mostlySans, _blockySans;
+    private Texture2D _background, _tinyMonoTexture, _mostlySansTexture, _blockySansTexture, _basicallyAsepriteTexture, _whitePixel;
+    private SpriteFont _tinyMono, _mostlySans, _blockySans, _basicallyAseprite;
     private Camera _camera;
+    private RasterizerState _rasterizerState;
     private GameObject _player;
     private GameObject[] _enemies;
 
@@ -39,7 +39,8 @@ public class Game1 : Game
 
         _inputManager = new(InputMode.mouseAndKeyboard);
         _spriteManager = new();
-        _camera = new Camera(new Rectangle(0, 0, 192, 144));
+        _camera = new(new Rectangle(0, 0, 192, 144));
+        _rasterizerState = new() { ScissorTestEnable = true };
         OnResizeWindow(null, null);
     }
 
@@ -60,11 +61,13 @@ public class Game1 : Game
 
         _background = Content.Load<Texture2D>("Bullet Souls mockup 1");
         _tinyMonoTexture = Content.Load<Texture2D>("tiny mono");
-        _mostlySansTexture = Content.Load<Texture2D>("mostly Sans");
-        _blockySansTexture = Content.Load<Texture2D>("blocky Sans");
+        _mostlySansTexture = Content.Load<Texture2D>("mostly sans");
+        _basicallyAsepriteTexture = Content.Load<Texture2D>("basically aseprite");
+        _blockySansTexture = Content.Load<Texture2D>("blocky sans");
 
         _tinyMono = FontBuilder.BuildFont(_tinyMonoTexture, new Point(3, 3), new Point(1, 1), ' ', false);
         _mostlySans = FontBuilder.BuildFont(_mostlySansTexture, new Point(5, 6), new Point(1, 1), ' ', new Point(3, 5));
+        _basicallyAseprite = FontBuilder.BuildFont(_basicallyAsepriteTexture, new Point(5, 7), new Point(1, 1), ' ', new Point(4, 6));
         _blockySans = FontBuilder.BuildFont(_blockySansTexture, new Point(8, 12), new Point(1, 1), ' ', new Point(6, 10));
         LoadScene("Data.json");
     }
@@ -114,20 +117,33 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.Black);
 
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, rasterizerState: _rasterizerState);
+        _spriteBatch.GraphicsDevice.ScissorRectangle = _camera.ViewRect;
 
         //_spriteBatch.Draw(_background, _viewRect, Color.White);
         _camera.Draw(_spriteBatch, _whitePixel, _camera.GameRect, Color.Blue);
-        _camera.DrawString(_spriteBatch, _tinyMono, FontBuilder.LimitStringWidth(_tinyMono, "This text is certainly hard to read,\nbut that's the point.",
-            _camera.GameRect.Width), new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 1), Color.White);
-        _camera.DrawString(_spriteBatch, _mostlySans, FontBuilder.LimitStringWidth(_mostlySans, "This text should be easy to read,\nbecause it gives explanations of menu actions.",
-            _camera.GameRect.Width), new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 21), Color.White);
-        _camera.DrawString(_spriteBatch, _blockySans, FontBuilder.LimitStringWidth(_blockySans, "This text is certainly easy to read,\nbut I still might be able to make it better.",
-            _camera.GameRect.Width), new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 41), Color.White);
-            
+        var text1 = FontBuilder.LimitStringWidth(_tinyMono, "This text is certainly hard to read,\n" +
+            "but that's the point.", _camera.GameRect.Width);
+        _camera.DrawString(_spriteBatch, _tinyMono, text1, new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 1), Color.White);
+
+        var text2 = FontBuilder.LimitStringWidth(_basicallyAseprite, "This text should be easy to read,\n" +
+            "because it gives explanations of menu actions.", _camera.GameRect.Width);
+        _camera.DrawString(_spriteBatch, _basicallyAseprite, text2, new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 21), Color.White);
+
+        var text3 = FontBuilder.LimitStringWidth(_blockySans, "This text is certainly easy to read,\n" +
+            "but I still might be able to make it better.", _camera.GameRect.Width);
+        _camera.DrawString(_spriteBatch, _blockySans, text3, new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 51), Color.White);
             
         var playerSprite = (SpriteComponent)_player.Components["sprite"];
-        _spriteManager.DrawSprite(_spriteBatch, playerSprite);
+        _spriteManager.DrawSprite(_spriteBatch, _camera, playerSprite);
+
+        //cover area outside camera (cheat)
+        //int letterboxWidth = (Window.ClientBounds.Width - _camera.ViewRect.Width) / 2;
+        //int letterboxHeight = (Window.ClientBounds.Height - _camera.ViewRect.Height) / 2;
+        //_spriteBatch.Draw(_whitePixel, new Rectangle(0, 0, Window.ClientBounds.Width, letterboxHeight), Color.Black);
+        //_spriteBatch.Draw(_whitePixel, new Rectangle(0, Window.ClientBounds.Bottom - letterboxHeight, Window.ClientBounds.Width, letterboxHeight), Color.Black);
+        //_spriteBatch.Draw(_whitePixel, new Rectangle(0, 0, letterboxWidth, Window.ClientBounds.Height), Color.Black);
+        //_spriteBatch.Draw(_whitePixel, new Rectangle(Window.ClientBounds.Right - letterboxWidth, 0, letterboxWidth, Window.ClientBounds.Height), Color.Black);
 
         _spriteBatch.End();
 
@@ -167,6 +183,7 @@ public class Game1 : Game
         _player = scene.Objects["players"][0];
         _enemies = scene.Objects["enemies"];
     }
+
     protected void OnResizeWindow(object sender, EventArgs e)
     {
         int xScale = Math.Max(1, Window.ClientBounds.Width / _camera.GameRect.Width);

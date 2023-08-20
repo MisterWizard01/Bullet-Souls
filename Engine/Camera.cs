@@ -28,15 +28,15 @@ namespace Engine
 
         public void Draw(SpriteBatch spriteBatch, Texture2D texture2D, Rectangle destination, Rectangle source, Color color)
         {
-            Rectangle finalDestination = new Rectangle(
+            var finalDestination = new Rectangle(
                 (destination.X - GameRect.X) * (int)Scale + ViewRect.X,
                 (destination.Y - GameRect.Y) * (int)Scale + ViewRect.Y,
                 destination.Width * (int)Scale,
                 destination.Height * (int)Scale
             );
-            source.Width = finalDestination.Width;
-            source.Height = finalDestination.Height;
-            spriteBatch.Draw(texture2D, Rectangle.Intersect(finalDestination, ViewRect), source, color);
+            //source.Width = finalDestination.Width;
+            //source.Height = finalDestination.Height;
+            spriteBatch.Draw(texture2D, finalDestination, source, color);
         }
 
         public void Draw(SpriteBatch spriteBatch, Texture2D texture2D, Rectangle destination, Color color)

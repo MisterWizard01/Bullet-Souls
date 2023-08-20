@@ -1,23 +1,18 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace Rendering_Proto;
+namespace RenderingProto;
 
 static class FontBuilder
 {
     public static SpriteFont BuildFont(Texture2D texture, Point maxGlyphSize, Point padding, char startChar, Point spaceSize, bool trim = true)
     {
-        List<Rectangle> glyphBounds = new List<Rectangle>();
-        List<Rectangle> cropping = new List<Rectangle>();
-        List<char> characters = new List<char>();
-        List<Vector3> kerning = new List<Vector3>();
+        var glyphBounds = new List<Rectangle>();
+        var cropping = new List<Rectangle>();
+        var characters = new List<char>();
+        var kerning = new List<Vector3>();
 
         int x = 0, y = 0;
         char curChar = startChar;
