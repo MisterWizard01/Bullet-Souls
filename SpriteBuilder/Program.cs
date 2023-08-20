@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Components;
+using Engine.Managers;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 
@@ -25,7 +26,7 @@ SpriteManager _spriteManager = new SpriteManager();
 
 Console.WriteLine("Enter a sprite file path to load a sprite from JSON or create a new JSON file.");
 Console.ForegroundColor = ConsoleColor.Blue;
-string filePath = Console.ReadLine();
+string filePath = Console.ReadLine() ?? "";
 Console.ForegroundColor = ConsoleColor.Gray;
 
 _spriteManager.LoadSprites(filePath);
@@ -43,14 +44,14 @@ while (true)
 
     Console.WriteLine("Enter sprite name (or empty line to quit):");
     Console.ForegroundColor = ConsoleColor.Blue;
-    string spriteName = Console.ReadLine();
+    string spriteName = Console.ReadLine() ?? "";
     Console.ForegroundColor = ConsoleColor.Gray;
     if (spriteName == "")
     {
         break;
     }
 
-    Sprite sprite;
+    SpriteComponent? sprite;
     if (!_spriteManager.Sprites.TryGetValue(spriteName, out sprite))
     {
         if (!GetYN("Couldn't find a sprite called '" + spriteName + "'. Create a new sprite? (y/n)"))
@@ -62,7 +63,7 @@ while (true)
         SaveSpriteJson();
     }
 
-    Console.WriteLine("Texture file path: " + sprite.TextureName);
+    Console.WriteLine("Texture file path: " + sprite.SpriteName);
     Console.WriteLine("Offset: " + sprite.Offset);
     Console.WriteLine("Frame Ratio: " + sprite.FrameRatio);
     Console.WriteLine("Start Frame: " + sprite.FrameIndex);
@@ -80,7 +81,7 @@ while (true)
 
         Console.WriteLine("Enter animation name (or empty line to go back): ");
         Console.ForegroundColor = ConsoleColor.Blue;
-        string animationName = Console.ReadLine();
+        string animationName = Console.ReadLine() ?? "";
         Console.ForegroundColor = ConsoleColor.Gray;
         if (animationName == "")
         {
@@ -112,7 +113,7 @@ while (true)
 
 #endregion
 
-void AnimationNotFound(Sprite sprite, string animationName)
+void AnimationNotFound(SpriteComponent sprite, string animationName)
 {
     if (!GetYN("Couldn't find an animation called '" + animationName + "'. Create a new animation? (y/n)"))
     {
@@ -136,11 +137,11 @@ void AnimationNotFound(Sprite sprite, string animationName)
 
 #region Builder Functions
 
-Sprite CreateSprite()
+SpriteComponent CreateSprite()
 {
     Console.WriteLine("Texture file path: ");
     Console.ForegroundColor = ConsoleColor.Blue;
-    string textureFilePath = Console.ReadLine();
+    string textureFilePath = Console.ReadLine() ?? "";
     Console.ForegroundColor = ConsoleColor.Gray;
 
     float offsetX = GetFloat("Offset X: ");
@@ -149,7 +150,7 @@ Sprite CreateSprite()
     float frameRatio = GetFloat("Frame Ratio: ");
     float startFrame = GetFloat("Start Frame: ");
 
-    return new Sprite(textureFilePath, new(offsetX, offsetY), Color.White, frameRatio, startFrame);
+    return new SpriteComponent(textureFilePath, new(offsetX, offsetY), Color.White, frameRatio, startFrame);
 }
 
 Animation CreateAnimation()
@@ -291,9 +292,9 @@ bool GetYN(string prompt)
 TEnum GetEnum<TEnum>(string prompt)
 {
     Console.WriteLine(prompt);
-    object result;
+    object? result;
     Console.ForegroundColor = ConsoleColor.Blue;
-    while (!Enum.TryParse(typeof(TEnum), Console.ReadLine(), out result))
+    while (!Enum.TryParse(typeof(TEnum), Console.ReadLine(), out result) || result == null)
     {
         Console.ForegroundColor = ConsoleColor.Gray;
         Console.WriteLine("Please enter one of the following options: ");

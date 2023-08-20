@@ -1,3 +1,3 @@
 ﻿
-using var game = new Rendering_Proto.Game1();
+using var game = new RenderingProto.Game1();
 game.Run();
