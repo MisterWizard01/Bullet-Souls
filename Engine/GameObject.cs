@@ -1,9 +1,10 @@
-﻿using Microsoft.Xna.Framework.Graphics;
+﻿using Engine.Components;
+using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 
 namespace Engine;
 
-public class GameObject
+public class GameObject : Positionable
 {
     public Dictionary<string, IComponent> Components;
 
@@ -20,11 +21,11 @@ public class GameObject
         }
     }
 
-    public void Draw(SpriteBatch spriteBatch)
+    public void Draw(Camera camera)
     {
         foreach (var component in Components.Values)
         {
-            //component.Draw(spriteBatch);
+            component.Draw(this, camera);
         }
     }
 }

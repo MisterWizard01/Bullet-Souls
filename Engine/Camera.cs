@@ -10,23 +10,26 @@ namespace Engine
 {
     public class Camera
     {
-        public Rectangle GameRect, ViewRect;
+        public Rectangle GameRect { get; set; }
+        public Rectangle ViewRect { get; set; }
+        public SpriteBatch SpriteBatch { get; set; }
         
         public float Scale
         {
             get { return ViewRect.Width / GameRect.Width; }
         }
 
-        public Camera(Rectangle gameRect, int scale = 1)
-            : this(gameRect, new Rectangle(gameRect.X, gameRect.Y, gameRect.Width * scale, gameRect.Height * scale)) { }
+        public Camera(SpriteBatch spriteBatch, Rectangle gameRect, int scale = 1)
+            : this(spriteBatch, gameRect, new Rectangle(gameRect.X, gameRect.Y, gameRect.Width * scale, gameRect.Height * scale)) { }
 
-        public Camera(Rectangle gameRect, Rectangle viewRect)
+        public Camera(SpriteBatch spriteBatch, Rectangle gameRect, Rectangle viewRect)
         {
+            SpriteBatch = spriteBatch;
             GameRect = gameRect;
             ViewRect = viewRect;
         }
 
-        public void Draw(SpriteBatch spriteBatch, Texture2D texture2D, Rectangle destination, Rectangle source, Color color)
+        public void Draw(Texture2D texture2D, Rectangle destination, Rectangle source, Color color)
         {
             var finalDestination = new Rectangle(
                 (destination.X - GameRect.X) * (int)Scale + ViewRect.X,
@@ -34,23 +37,21 @@ namespace Engine
                 destination.Width * (int)Scale,
                 destination.Height * (int)Scale
             );
-            //source.Width = finalDestination.Width;
-            //source.Height = finalDestination.Height;
-            spriteBatch.Draw(texture2D, finalDestination, source, color);
+            SpriteBatch.Draw(texture2D, finalDestination, source, color);
         }
 
-        public void Draw(SpriteBatch spriteBatch, Texture2D texture2D, Rectangle destination, Color color)
+        public void Draw(Texture2D texture2D, Rectangle destination, Color color)
         {
-            Draw(spriteBatch, texture2D, destination, texture2D.Bounds, color);
+            Draw(texture2D, destination, texture2D.Bounds, color);
         }
 
-        public void DrawString(SpriteBatch spriteBatch, SpriteFont font, string text, Vector2 destination, Color color)
+        public void DrawString(SpriteFont font, string text, Vector2 destination, Color color)
         {
             var finalPosition = new Vector2(
                 (destination.X - GameRect.X) * (int)Scale + ViewRect.X,
                 (destination.Y - GameRect.Y) * (int)Scale + ViewRect.Y
             );
-            spriteBatch.DrawString(font, text, finalPosition, color, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+            SpriteBatch.DrawString(font, text, finalPosition, color, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
         }
     }
 }

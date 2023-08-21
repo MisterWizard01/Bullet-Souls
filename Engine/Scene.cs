@@ -10,13 +10,11 @@ namespace Engine;
 
 public class Scene
 {
-    public Dictionary<string, Sprite> Sprites;
-    public Dictionary<string, GameObject[]> Objects;
+    public Dictionary<string, GameObject[]> Objects { get; set; }
 
     [JsonConstructor]
-    public Scene(Dictionary<string, Sprite> sprites, Dictionary<string, GameObject[]> objects)
+    public Scene(Dictionary<string, GameObject[]> objects)
     {
-        Sprites = sprites;
         Objects = objects;
     }
 }

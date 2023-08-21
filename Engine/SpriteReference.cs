@@ -1,13 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Engine;
 
-namespace Engine;
-
-public struct SpriteReference
+public class SpriteReference
 {
-    private Sprite _sprite;
+    private Sprite? _sprite;
+    private string _spriteName;
 
+    /// <summary>
+    /// Signals that this SpriteReference needs its Sprite updated.
+    /// </summary>
+    public event EventHandler SpriteUpdateEvent;
+
+    public string SpriteName
+    {
+        get => _spriteName;
+        set
+        {
+            _spriteName = value;
+            SpriteUpdateEvent(this, new());
+        }
+    }
+
+    public Sprite Sprite
+    {
+        get 
+    }
 }
