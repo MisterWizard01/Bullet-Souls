@@ -13,11 +13,11 @@ public class GameObject : Positionable
         Components = new();
     }
 
-    public void Update(int frameNumber, InputState keyboardState)
+    public void Update(int frameNumber, InputState inputState)
     {
         foreach (var component in Components.Values)
         {
-            //component.Update(frameNumber, keyboardState);
+            component.Update(this, frameNumber, inputState);
         }
     }
 

@@ -1,0 +1,25 @@
+{
+  "Objects": {
+    "players": [
+      {
+        "Name": "player",
+        "Position": "100.5, 23",
+        "Components": {
+          "sprite": {
+            "Type": "Sprite",
+            "SpriteName": "player",
+            "AnimationName": "stand down",
+            "FrameRatio": 0
+          },
+          "playerController": {
+            "Type": "PlayerController",
+            "Speed": 0.75
+          }
+        }
+      }
+    ],
+    "enemies": [
+      
+    ]
+  }
+}

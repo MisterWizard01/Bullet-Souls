@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,12 +27,12 @@ public class InputManager
         };
     }
 
-    public void Update()
+    public void Update(Vector2 referencePoint)
     {
         float[] signals = new float[InputState.SignalCount];
         for (int i = 0; i < signals.Length; i++)
         {
-            signals[i] = Bindings[Mode][i]?.GetSignalValue(Mouse.GetState(), Keyboard.GetState(), GamePad.GetState(1)) ?? 0;
+            signals[i] = Bindings[Mode][i]?.GetSignalValue(Mouse.GetState(), Keyboard.GetState(), GamePad.GetState(0), referencePoint) ?? 0;
         }
 
         InputState = new InputState(signals);

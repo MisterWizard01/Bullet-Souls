@@ -7,7 +7,7 @@ namespace Engine.Components
     [JsonConverter(typeof(ComponentConverter))]
     public interface IComponent
     {
-        public void Update(int frameNumber, InputState inputState);
+        public void Update(GameObject gameObject, int frameNumber, InputState inputState);
 
         public void Draw(GameObject gameObject, Camera camera);
     }

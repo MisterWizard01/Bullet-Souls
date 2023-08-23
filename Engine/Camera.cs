@@ -31,9 +31,10 @@ namespace Engine
 
         public void Draw(Texture2D texture2D, Rectangle destination, Rectangle source, Color color)
         {
+            var finalPosition = GameToView(destination.Location);
             var finalDestination = new Rectangle(
-                (destination.X - GameRect.X) * (int)Scale + ViewRect.X,
-                (destination.Y - GameRect.Y) * (int)Scale + ViewRect.Y,
+                finalPosition.X,
+                finalPosition.Y,
                 destination.Width * (int)Scale,
                 destination.Height * (int)Scale
             );
@@ -47,11 +48,30 @@ namespace Engine
 
         public void DrawString(SpriteFont font, string text, Vector2 destination, Color color)
         {
-            var finalPosition = new Vector2(
-                (destination.X - GameRect.X) * (int)Scale + ViewRect.X,
-                (destination.Y - GameRect.Y) * (int)Scale + ViewRect.Y
-            );
+            var finalPosition = GameToView(destination);
             SpriteBatch.DrawString(font, text, finalPosition, color, 0, Vector2.Zero, Scale, SpriteEffects.None, 0);
+        }
+
+        public Point GameToView(Point gamePosition)
+        {
+            var result = GameToView(gamePosition.ToVector2());
+            return result.ToPoint();
+        }
+
+        public Vector2 GameToView(Vector2 gamePosition)
+        {
+            return (gamePosition - GameRect.Location.ToVector2()) * Scale + ViewRect.Location.ToVector2();
+        }
+
+        public Point ViewToGame(Point viewPosition)
+        {
+            var result = ViewToGame(viewPosition.ToVector2());
+            return result.ToPoint();
+        }
+
+        public Vector2 ViewToGame(Vector2 viewPosition)
+        {
+            return (viewPosition - ViewRect.Location.ToVector2()) / Scale + GameRect.Location.ToVector2();
         }
     }
 }

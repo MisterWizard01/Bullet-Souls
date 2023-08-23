@@ -1,36 +1,36 @@
 ﻿using Engine.CustomEventArgs;
 using Engine.JsonConverters;
+using Engine.Managers;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
 namespace Engine.Components;
 
-//[JsonConverter(typeof(SpriteComponentConverter))]
 public class SpriteComponent : Positionable, IComponent
 {
-    private Animation? _animation;
+    private float _frameIndex;
 
     public float FrameRatio { get; set; }
-    public float FrameIndex { get; set; }
     public Color BlendColor { get; set; }
+    public float FrameIndex
+    {
+        get => _frameIndex;
+        set
+        {
+            if (Animation != null && value >= Animation.Length)
+            {
+                _frameIndex = 0;
+                return;
+            }
+            _frameIndex = MathF.Max(value, 0);
+        }
+    }
 
     [JsonIgnore]
     public Sprite? Sprite { get; set; }
     [JsonIgnore]
-    public Animation? Animation
-    {
-        get => _animation;
-        set
-        {
-            if (Sprite == null || value == null || !Sprite.Animations.ContainsValue(value))
-            {
-                _animation = null;
-                return;
-            }
-            _animation = value;
-        }
-    }
+    public Animation? Animation { get; private set; }
 
     /// <summary>
     /// Signals that this SpriteComponent needs its Sprite updated.
@@ -44,11 +44,9 @@ public class SpriteComponent : Positionable, IComponent
     }
 
     [JsonConstructor]
-    public SpriteComponent(string? spriteName, string? animationName)
+    public SpriteComponent(string spriteName, string animationName)
         : this()
     {
-        if (spriteName == null)
-            return;
         SpriteUpdateEvent(this, new(spriteName));
         SetAnimation(animationName);
     }
@@ -59,7 +57,7 @@ public class SpriteComponent : Positionable, IComponent
         BlendColor = Color.White;
     }
 
-    public void Update(int frameNumber, InputState inputState)
+    public void Update(GameObject gameObject, int frameNumber, InputState inputState)
     {
         if (Sprite == null)
         {
@@ -72,7 +70,7 @@ public class SpriteComponent : Positionable, IComponent
             return;
         }
 
-        FrameIndex += FrameRatio;
+        _frameIndex += FrameRatio;
         if (FrameIndex >= Animation.Frames.Count || FrameIndex < 0)
         {
             switch (Animation.EndAction)
@@ -104,7 +102,7 @@ public class SpriteComponent : Positionable, IComponent
         Draw(camera, gameObject.Position);
     }
 
-    public void Draw(Camera camera, Vector2 referencePoint)
+    public void Draw(Camera camera, Vector2 position)
     {
         if (Sprite == null)
         {
@@ -124,30 +122,31 @@ public class SpriteComponent : Positionable, IComponent
 
         var source = Animation[(int)FrameIndex];
         var destination = new Rectangle(
-            (int)(X + referencePoint.X - Animation.Size.X / 2.0f),
-            (int)(Y + referencePoint.Y - Animation.Size.Y / 2.0f),
+            (int)(X + position.X - Animation.Size.X / 2.0f),
+            (int)(Y + position.Y - Animation.Size.Y / 2.0f),
             Animation.Size.X, Animation.Size.Y
         );
         camera.Draw(Sprite.Texture, destination, source, BlendColor);
     }
 
-    public void SetAnimation(string? animationName)
+    public void SetAnimation(string animationName)
     {
         if (Sprite == null)
         {
             Debug.WriteLine("Tried to set animation for null sprite.");
             return;
         }
-        if (animationName == null)
-        {
-            Animation = null;
-            return;
-        }
         if (!Sprite.Animations.TryGetValue(animationName, out Animation? animation))
         {
             Debug.WriteLine("Sprite does not contain an animation called '" + animationName + "'.");
         }
+        if (Animation == animation)
+            return;
 
         Animation = animation;
+        if (Animation != null)
+        {
+            FrameIndex = _frameIndex;
+        }
     }
 }

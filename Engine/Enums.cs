@@ -24,12 +24,24 @@
         HorizontalScroll,
     }
 
+    public enum GamePadAxes
+    {
+        LeftStickX,
+        LeftStickY,
+        RightStickX,
+        RightStickY,
+        LeftTrigger,
+        RightTrigger,
+    }
+
     public enum InputSignal
     {
         HorizontalMovement,
         VerticalMovement,
         HorizontalFacing,
         VerticalFacing,
+        Fire,
+        Dash,
     }
 
     public enum AnimationEndAction

@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework.Input;
+﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace Engine;
 
@@ -19,7 +20,11 @@ public class Binding
 
 public interface IInput
 {
-    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, float reference = 0);
+    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint);
+    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState)
+    {
+        return GetSignalValue(mouseState, keyboardState, gamePadState, Vector2.Zero);
+    }
 }
 
 public class KeyInput : IInput
@@ -32,7 +37,7 @@ public class KeyInput : IInput
         this.positiveKey = positiveKey;
     }
 
-    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, float reference = 0)
+    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint)
     {
         return (keyboardState.IsKeyDown(positiveKey) ? 1 : 0) - (keyboardState.IsKeyDown(negativeKey) ? 1 : 0);
     }
@@ -42,7 +47,7 @@ public class MouseButtonInput : IInput
 {
     public MouseButtons negativeButton, positiveButton;
 
-    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, float reference = 0)
+    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint)
     {
         return ButtonToFloat(mouseState, positiveButton) - ButtonToFloat(mouseState, negativeButton);
     }
@@ -64,15 +69,23 @@ public class MouseButtonInput : IInput
 public class MouseAxisInput : IInput
 {
     public MouseAxes mouseAxis;
+    public bool inverted;
 
-    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, float reference = 0)
+    public MouseAxisInput(MouseAxes mouseAxis, bool inverted = false)
     {
-        return mouseAxis switch
+        this.mouseAxis = mouseAxis;
+        this.inverted = inverted;
+    }
+
+    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint)
+    {
+        var direction = Vector2.Normalize(mouseState.Position.ToVector2() - referencePoint);
+        return (inverted ? -1 : 1) * mouseAxis switch
         {
-            MouseAxes.MouseX => mouseState.X - reference,
-            MouseAxes.MouseY => mouseState.Y - reference,
-            MouseAxes.VerticalScroll => mouseState.ScrollWheelValue - reference,
-            MouseAxes.HorizontalScroll => mouseState.HorizontalScrollWheelValue - reference,
+            MouseAxes.MouseX => mouseState.X - referencePoint.X,
+            MouseAxes.MouseY => mouseState.Y - referencePoint.Y,
+            MouseAxes.VerticalScroll => mouseState.ScrollWheelValue - referencePoint.X,
+            MouseAxes.HorizontalScroll => mouseState.HorizontalScrollWheelValue - referencePoint.Y,
             _ => 0,
         };
     }
@@ -82,7 +95,13 @@ public class GamePadButtonInput : IInput
 {
     public Buttons negativeButton, positiveButton;
 
-    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, float reference = 0)
+    public GamePadButtonInput(Buttons negativeButton, Buttons positiveButton)
+    {
+        this.negativeButton = negativeButton;
+        this.positiveButton = positiveButton;
+    }
+
+    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint)
     {
         return (gamePadState.IsButtonDown(positiveButton) ? 1 : 0) - (gamePadState.IsButtonDown(negativeButton) ? 1 : 0);
     }
@@ -90,10 +109,26 @@ public class GamePadButtonInput : IInput
 
 public class GamePadAxisInput : IInput
 {
-    public Buttons gamePadAxis;
+    public GamePadAxes gamePadAxis;
+    public bool inverted;
 
-    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, float reference = 0)
+    public GamePadAxisInput(GamePadAxes gamePadAxis, bool inverted = false)
     {
-        throw new NotImplementedException();
+        this.gamePadAxis = gamePadAxis;
+        this.inverted = inverted;
+    }
+
+    public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint)
+    {
+        return (inverted ? -1 : 1) * gamePadAxis switch
+        {
+            GamePadAxes.LeftStickX => gamePadState.ThumbSticks.Left.X,
+            GamePadAxes.LeftStickY => gamePadState.ThumbSticks.Left.Y,
+            GamePadAxes.RightStickX => gamePadState.ThumbSticks.Right.X,
+            GamePadAxes.RightStickY => gamePadState.ThumbSticks.Right.Y,
+            GamePadAxes.LeftTrigger => gamePadState.Triggers.Left,
+            GamePadAxes.RightTrigger => gamePadState.Triggers.Right,
+            _ => 0,
+        };
     }
 }

@@ -1,25 +1,22 @@
 ﻿using Engine;
-using Engine.Components;
 using Engine.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Newtonsoft.Json;
-using SpriteBuilder;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 
-namespace RenderingProto;
+namespace ControlsProto;
 
 public class Game1 : Game
 {
     private readonly GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
 
-    private Texture2D _background, _tinyMonoTexture, _mostlySansTexture, _blockySansTexture, _basicallyAsepriteTexture, _whitePixel;
-    private SpriteFont _tinyMono, _mostlySans, _blockySans, _basicallyAseprite;
+    private Texture2D _background, _whitePixel;
     private Camera _camera;
     private RasterizerState _rasterizerState;
     private GameObject _player;
@@ -45,8 +42,15 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
-        _inputManager.SetBinding(InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
-        _inputManager.SetBinding(InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
+        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
+        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
+        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.HorizontalFacing, new MouseAxisInput(MouseAxes.MouseX));
+        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.VerticalFacing, new MouseAxisInput(MouseAxes.MouseY));
+
+        _inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalMovement, new GamePadAxisInput(GamePadAxes.LeftStickX));
+        _inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalMovement, new GamePadAxisInput(GamePadAxes.LeftStickY, true));
+        _inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalFacing, new GamePadAxisInput(GamePadAxes.RightStickX));
+        _inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalFacing, new GamePadAxisInput(GamePadAxes.RightStickY, true));
 
         base.Initialize();
 
@@ -62,15 +66,6 @@ public class Game1 : Game
         _whitePixel.SetData(new Color[] { Color.White });
 
         _background = Content.Load<Texture2D>("Bullet Souls mockup 1");
-        _tinyMonoTexture = Content.Load<Texture2D>("tiny mono");
-        _mostlySansTexture = Content.Load<Texture2D>("mostly sans");
-        _basicallyAsepriteTexture = Content.Load<Texture2D>("basically aseprite");
-        _blockySansTexture = Content.Load<Texture2D>("blocky sans");
-
-        _tinyMono = FontBuilder.BuildFont(_tinyMonoTexture, new Point(3, 3), new Point(1, 1), ' ', false);
-        _mostlySans = FontBuilder.BuildFont(_mostlySansTexture, new Point(5, 6), new Point(1, 1), ' ', new Point(3, 5));
-        _basicallyAseprite = FontBuilder.BuildFont(_basicallyAsepriteTexture, new Point(5, 7), new Point(1, 1), ' ', new Point(4, 6));
-        _blockySans = FontBuilder.BuildFont(_blockySansTexture, new Point(8, 12), new Point(1, 1), ' ', new Point(6, 10));
 
         string commonFolder = FileManager.GetCommonFolder();
         LoadSprites(Path.Combine(commonFolder, "Data.json"));
@@ -85,7 +80,7 @@ public class Game1 : Game
             Exit();
         if (keyboardState.IsKeyDown(Keys.Space) && _prevKeyboardState.IsKeyUp(Keys.Space))
             ToggleFullScreen();
-        _inputManager.Update();
+        _inputManager.Update(_camera.GameToView(_player.Position));
         var inputState = _inputManager.InputState;
 
         //var signals = inputState.GetInputs();
@@ -137,7 +132,7 @@ public class Game1 : Game
         {
             enemy.Draw(_camera);
         }
-        
+
         _spriteBatch.End();
         base.Draw(gameTime);
     }
@@ -196,21 +191,5 @@ public class Game1 : Game
 
         _player = scene.Objects["players"][0];
         _enemies = scene.Objects["enemies"];
-    }
-
-    protected void TestTextRendering()
-    {
-        //_camera.Draw(_spriteBatch, _whitePixel, _camera.GameRect, Color.Blue);
-        var text1 = FontBuilder.LimitStringWidth(_tinyMono, "This text is certainly hard to read,\n" +
-            "but that's the point.", _camera.GameRect.Width);
-        _camera.DrawString(_tinyMono, text1, new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 1), Color.White);
-
-        var text2 = FontBuilder.LimitStringWidth(_basicallyAseprite, "This text should be easy to read,\n" +
-            "because it gives explanations of menu actions.", _camera.GameRect.Width);
-        _camera.DrawString(_basicallyAseprite, text2, new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 21), Color.White);
-
-        var text3 = FontBuilder.LimitStringWidth(_blockySans, "This text is certainly easy to read,\n" +
-            "but I still might be able to make it better.", _camera.GameRect.Width);
-        _camera.DrawString(_blockySans, text3, new Vector2(_camera.GameRect.X + 1, _camera.GameRect.Y + 51), Color.White);
     }
 }

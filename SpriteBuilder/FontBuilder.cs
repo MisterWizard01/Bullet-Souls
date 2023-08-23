@@ -3,9 +3,9 @@ using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RenderingProto;
+namespace SpriteBuilder;
 
-static class FontBuilder
+public static class FontBuilder
 {
     public static SpriteFont BuildFont(Texture2D texture, Point maxGlyphSize, Point padding, char startChar, Point spaceSize, bool trim = true)
     {

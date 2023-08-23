@@ -28,7 +28,11 @@ public class ComponentConverter : JsonConverter
         switch (type)
         {
             case "Sprite":
-                component = new SpriteComponent(jsonObject.Value<string>("SpriteName"), jsonObject.Value<string>("AnimationName"));
+                component = new SpriteComponent(jsonObject.Value<string>("SpriteName") ?? "", jsonObject.Value<string>("AnimationName") ?? "");
+                break;
+
+            case "PlayerController":
+                component = new PlayerComponent(jsonObject.Value<float>("Speed"));
                 break;
 
             default:

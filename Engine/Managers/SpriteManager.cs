@@ -36,4 +36,42 @@ public class SpriteManager
         }
         sc.Sprite = sprite;
     }
+
+    public static string DirectionString8(Vector2 vector)
+    {
+        var direction = Math.Atan2(vector.Y, vector.X);
+        var piOver8 = Math.PI / 8;
+        if (direction > 7 * piOver8)
+            return "left";
+        if (direction > 5 * piOver8)
+            return "downleft";
+        if (direction > 3 * piOver8)
+            return "down";
+        if (direction > piOver8)
+            return "downright";
+        if (direction > -piOver8)
+            return "right";
+        if (direction > -3 * piOver8)
+            return "upright";
+        if (direction > -5 * piOver8)
+            return "up";
+        if (direction > -7 * piOver8)
+            return "upleft";
+        return "left";
+    }
+
+    public static string DirectionString4(Vector2 vector)
+    {
+        var direction = Math.Atan2(vector.Y, vector.X);
+        var piOver4 = Math.PI / 4;
+        if (direction > 3 * piOver4)
+            return "left";
+        if (direction > piOver4)
+            return "down";
+        if (direction > -piOver4)
+            return "right";
+        if (direction > -3 * piOver4)
+            return "up";
+        return "left";
+    }
 }
