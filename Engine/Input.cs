@@ -37,6 +37,12 @@ public class KeyInput : IInput
         this.positiveKey = positiveKey;
     }
 
+    public KeyInput(Keys key)
+    {
+        positiveKey = key;
+        negativeKey = Keys.None;
+    }
+
     public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint)
     {
         return (keyboardState.IsKeyDown(positiveKey) ? 1 : 0) - (keyboardState.IsKeyDown(negativeKey) ? 1 : 0);
@@ -46,6 +52,18 @@ public class KeyInput : IInput
 public class MouseButtonInput : IInput
 {
     public MouseButtons negativeButton, positiveButton;
+
+    public MouseButtonInput(MouseButtons negativeButton, MouseButtons positiveButton)
+    {
+        this.negativeButton = negativeButton;
+        this.positiveButton = positiveButton;
+    }
+
+    public MouseButtonInput(MouseButtons button)
+    {
+        positiveButton = button;
+        negativeButton = MouseButtons.None;
+    }
 
     public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint)
     {
@@ -99,6 +117,12 @@ public class GamePadButtonInput : IInput
     {
         this.negativeButton = negativeButton;
         this.positiveButton = positiveButton;
+    }
+
+    public GamePadButtonInput(Buttons button)
+    {
+        positiveButton = button;
+        negativeButton = Buttons.None;
     }
 
     public float GetSignalValue(MouseState mouseState, KeyboardState keyboardState, GamePadState gamePadState, Vector2 referencePoint)

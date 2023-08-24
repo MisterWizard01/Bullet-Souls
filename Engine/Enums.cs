@@ -9,6 +9,7 @@
 
     public enum MouseButtons
     {
+        None,
         LeftButton,
         MiddleButton,
         RightButton,
@@ -18,6 +19,7 @@
 
     public enum MouseAxes
     {
+        None,
         MouseX,
         MouseY,
         VerticalScroll,
@@ -26,6 +28,7 @@
 
     public enum GamePadAxes
     {
+        None,
         LeftStickX,
         LeftStickY,
         RightStickX,
@@ -42,6 +45,10 @@
         VerticalFacing,
         Fire,
         Dash,
+        Recover,
+        Strafe,
+        Grenade,
+        Interact,
     }
 
     public enum AnimationEndAction

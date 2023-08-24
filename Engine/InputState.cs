@@ -5,6 +5,9 @@ public struct InputState
     private float[] signals;
     public readonly int SignalCount;
 
+    public float this[InputSignal signal] => GetInput(signal);
+    //public bool this[InputSignal signal] => GetInput(signal) > 0;
+
     public InputState()
     {
         SignalCount = Enum.GetValues(typeof(InputSignal)).Length;

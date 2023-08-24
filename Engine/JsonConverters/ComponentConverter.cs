@@ -32,7 +32,7 @@ public class ComponentConverter : JsonConverter
                 break;
 
             case "PlayerController":
-                component = new PlayerComponent(jsonObject.Value<float>("Speed"));
+                component = new PlayerComponent(jsonObject.Value<float>("Speed"), jsonObject.Value<float>("DashDistance"));
                 break;
 
             default:

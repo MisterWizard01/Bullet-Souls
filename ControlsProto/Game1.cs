@@ -42,15 +42,25 @@ public class Game1 : Game
 
     protected override void Initialize()
     {
+        _inputManager.SetBinding(InputMode.keyboardOnly, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
+        _inputManager.SetBinding(InputMode.keyboardOnly, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
+        _inputManager.SetBinding(InputMode.keyboardOnly, InputSignal.HorizontalFacing, new KeyInput(Keys.Left, Keys.Right));
+        _inputManager.SetBinding(InputMode.keyboardOnly, InputSignal.VerticalFacing, new KeyInput(Keys.Up, Keys.Down));
+        _inputManager.SetBinding(InputMode.keyboardOnly, InputSignal.Strafe, new KeyInput(Keys.LeftShift));
+        _inputManager.SetBinding(InputMode.keyboardOnly, InputSignal.Dash, new KeyInput(Keys.Space));
+
         _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
         _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
         _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.HorizontalFacing, new MouseAxisInput(MouseAxes.MouseX));
         _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.VerticalFacing, new MouseAxisInput(MouseAxes.MouseY));
+        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.Dash, new KeyInput(Keys.Space));
 
         _inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalMovement, new GamePadAxisInput(GamePadAxes.LeftStickX));
         _inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalMovement, new GamePadAxisInput(GamePadAxes.LeftStickY, true));
         _inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalFacing, new GamePadAxisInput(GamePadAxes.RightStickX));
         _inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalFacing, new GamePadAxisInput(GamePadAxes.RightStickY, true));
+        _inputManager.SetBinding(InputMode.XBoxController, InputSignal.Strafe, new GamePadButtonInput(Buttons.LeftTrigger));
+        _inputManager.SetBinding(InputMode.XBoxController, InputSignal.Dash, new GamePadButtonInput(Buttons.B));
 
         base.Initialize();
 
@@ -78,7 +88,7 @@ public class Game1 : Game
         KeyboardState keyboardState = Keyboard.GetState();
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboardState.IsKeyDown(Keys.Escape))
             Exit();
-        if (keyboardState.IsKeyDown(Keys.Space) && _prevKeyboardState.IsKeyUp(Keys.Space))
+        if (keyboardState.IsKeyDown(Keys.F1) && _prevKeyboardState.IsKeyUp(Keys.F1))
             ToggleFullScreen();
         _inputManager.Update(_camera.GameToView(_player.Position));
         var inputState = _inputManager.InputState;
@@ -92,14 +102,6 @@ public class Game1 : Game
 
         //update objects
         _player.Update(frameNumber, inputState);
-        //foreach (var shot in _playerShots)
-        //{
-        //    shot.Update(frameNumber, inputState);
-        //}
-        //foreach (var bullet in _bullets)
-        //{
-        //    bullet.Update(frameNumber, inputState);
-        //}
         foreach (var enemy in _enemies)
         {
             enemy.Update(frameNumber, inputState);
