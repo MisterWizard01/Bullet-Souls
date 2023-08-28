@@ -1,4 +1,4 @@
-﻿using Engine.Components;
+﻿using Engine.Nodes;
 using Engine.CustomEventArgs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -15,7 +15,7 @@ public class SpriteManager
     public SpriteManager()
     {
         Sprites = new();
-        SpriteComponent.SpriteUpdateEvent += OnSpriteUpdate;
+        SpriteNode.SpriteUpdateEvent += OnSpriteUpdate;
     }
 
     public void LoadSpriteTextures(ContentManager content)
@@ -28,7 +28,7 @@ public class SpriteManager
 
     public void OnSpriteUpdate(object? sender, SpriteUpdateEventArgs e)
     {
-        if (sender is not SpriteComponent sc)
+        if (sender is not SpriteNode sc)
             return;
         if (!Sprites.TryGetValue(e.SpriteName, out var sprite))
         {
@@ -73,5 +73,30 @@ public class SpriteManager
         if (direction > -3 * piOver4)
             return "up";
         return "left";
+    }
+
+    public static void YSortChildren(Node node)
+    {
+        var nodeList = node.GetChildren().ToList();
+        for (int i = 0; i < nodeList.Count - 1; i++)
+        {
+            if (nodeList[i].Value is not PositionableNode first)
+                continue;
+            var firstY = first.WorldPosition(node).Y;
+
+            for (int j = i + 1; j < nodeList.Count; j++)
+            {
+                if (nodeList[j].Value is not PositionableNode second)
+                    continue;
+                var secondY = second.WorldPosition(node).Y;
+
+                if (firstY > secondY)
+                {
+                    (nodeList[j], nodeList[i]) = (nodeList[i], nodeList[j]);
+                    firstY = secondY;
+                }
+            }
+        }
+        node.SetChildren(new Dictionary<string, Node>(nodeList));
     }
 }

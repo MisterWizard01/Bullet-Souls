@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Nodes;
 using Engine.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -19,14 +20,16 @@ public class Game1 : Game
     private Texture2D _background, _whitePixel;
     private Camera _camera;
     private RasterizerState _rasterizerState;
-    private GameObject _player;
-    private GameObject[] _enemies;
+    private PlayerNode _player;
+    private Node _enemies;
 
     private readonly InputManager _inputManager;
     private readonly SpriteManager _spriteManager;
 
     private KeyboardState _prevKeyboardState;
     private int frameNumber;
+    //private Effect _grayscaleEffect, _silhouetteEffect;
+    private Effect _betterBlend;
 
     public Game1()
     {
@@ -76,6 +79,9 @@ public class Game1 : Game
         _whitePixel.SetData(new Color[] { Color.White });
 
         _background = Content.Load<Texture2D>("Bullet Souls mockup 1");
+        //_grayscaleEffect = Content.Load<Effect>("grayscale");
+        //_silhouetteEffect = Content.Load<Effect>("silhouette");
+        _betterBlend = Content.Load<Effect>("betterBlend");
 
         string commonFolder = FileManager.GetCommonFolder();
         LoadSprites(Path.Combine(commonFolder, "Data.json"));
@@ -101,11 +107,8 @@ public class Game1 : Game
         //Debug.WriteLine("");
 
         //update objects
-        _player.Update(frameNumber, inputState);
-        foreach (var enemy in _enemies)
-        {
-            enemy.Update(frameNumber, inputState);
-        }
+        _player.Update(null, frameNumber, inputState);
+        _enemies.Update(null, frameNumber, inputState);
 
         //detect and handle collisions
         //var enemyCollisions = new List<Collision>();
@@ -125,15 +128,17 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, rasterizerState: _rasterizerState);
+        _spriteBatch.Begin(
+            samplerState: SamplerState.PointClamp,
+            rasterizerState: _rasterizerState,
+            effect: _betterBlend,
+            blendState: BlendState.NonPremultiplied
+        );
         _spriteBatch.GraphicsDevice.ScissorRectangle = _camera.ViewRect;
 
-        _camera.Draw(_background, _camera.GameRect, Color.White);
-        _player.Draw(_camera);
-        foreach (var enemy in _enemies)
-        {
-            enemy.Draw(_camera);
-        }
+        _camera.Draw(_background, _camera.GameRect, Color.Transparent);
+        _player.Draw(null, _camera);
+        _enemies.Draw(null, _camera);
 
         _spriteBatch.End();
         base.Draw(gameTime);
@@ -184,14 +189,14 @@ public class Game1 : Game
     {
         using StreamReader reader = new(filePath);
         var json = reader.ReadToEnd();
-        var scene = JsonConvert.DeserializeObject<Scene>(json);
+        var scene = JsonConvert.DeserializeObject<Node>(json);
         if (scene == null)
         {
             Debug.WriteLine("Could not read JSON sprite file.");
             return;
         }
 
-        _player = scene.Objects["players"][0];
-        _enemies = scene.Objects["enemies"];
+        _player = scene.GetChild("player") as PlayerNode;
+        _enemies = scene.GetChild("enemies");
     }
 }

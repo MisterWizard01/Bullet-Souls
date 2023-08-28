@@ -1,4 +1,4 @@
-﻿using Engine.Components;
+﻿using Engine.Nodes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics;
@@ -12,7 +12,7 @@ public class SpriteComponentConverter : JsonConverter
 
     public override bool CanConvert(Type objectType)
     {
-        return objectType == typeof(SpriteComponent);
+        return objectType == typeof(SpriteNode);
     }
 
     public override void WriteJson(JsonWriter writer, object? value, JsonSerializer serializer)

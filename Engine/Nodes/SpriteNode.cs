@@ -1,18 +1,17 @@
 ﻿using Engine.CustomEventArgs;
-using Engine.JsonConverters;
-using Engine.Managers;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
 using System.Diagnostics;
 
-namespace Engine.Components;
+namespace Engine.Nodes;
 
-public class SpriteComponent : Positionable, IComponent
+public class SpriteNode : PositionableNode
 {
     private float _frameIndex;
 
     public float FrameRatio { get; set; }
     public Color BlendColor { get; set; }
+    public bool Visible { get; set; }
     public float FrameIndex
     {
         get => _frameIndex;
@@ -37,38 +36,36 @@ public class SpriteComponent : Positionable, IComponent
     /// </summary>
     public static event EventHandler<SpriteUpdateEventArgs> SpriteUpdateEvent;
 
-    public SpriteComponent(Sprite sprite)
-        : this()
+    public SpriteNode(Sprite sprite) : this(new(), sprite) { }
+    public SpriteNode(Dictionary<string, Node> children, Sprite sprite)
+        : this(children)
     {
         Sprite = sprite;
     }
 
+    public SpriteNode(string spriteName, string animationName) : this(new(), spriteName, animationName) { }
+
     [JsonConstructor]
-    public SpriteComponent(string spriteName, string animationName)
-        : this()
+    public SpriteNode(Dictionary<string, Node> children, string spriteName, string animationName)
+        : this(children)
     {
         SpriteUpdateEvent(this, new(spriteName));
         SetAnimation(animationName);
     }
 
-    private SpriteComponent()
+    private SpriteNode(Dictionary<string, Node> children)
+        : base(children)
     {
         FrameRatio = 1;
-        BlendColor = Color.White;
+        BlendColor = Color.Transparent;
+        Visible = true;
+        RelativePosition = true;
     }
 
-    public void Update(GameObject gameObject, int frameNumber, InputState inputState)
+    public override void Update(Node parent, int frameNumber, InputState inputState)
     {
-        if (Sprite == null)
-        {
-            Debug.WriteLine("Tried to update sprite component with null sprite.");
+        if (Sprite == null || Animation == null)
             return;
-        }
-        if (Animation == null)
-        {
-            Debug.WriteLine("Tried to update sprite component with null animation.");
-            return;
-        }
 
         _frameIndex += FrameRatio;
         if (FrameIndex >= Animation.Frames.Count || FrameIndex < 0)
@@ -95,29 +92,24 @@ public class SpriteComponent : Positionable, IComponent
                     break;
             }
         }
+
+        base.Update(this, frameNumber, inputState);
     }
 
-    public void Draw(GameObject gameObject, Camera camera)
+    public override void Draw(Node parent, Camera camera)
     {
-        Draw(camera, gameObject.Position);
+        Draw(camera, (parent as PositionableNode)?.Position ?? Vector2.Zero);
+        base.Draw(this, camera);
     }
 
     public void Draw(Camera camera, Vector2 position)
     {
-        if (Sprite == null)
-        {
-            Debug.WriteLine("Tried to draw null sprite.");
+        if (!Visible || Sprite == null || Sprite.Texture == null || Animation == null)
             return;
-        }
-        if (Sprite.Texture == null)
+
+        if (!RelativePosition)
         {
-            Debug.WriteLine("Tried to draw sprite with null texture.");
-            return;
-        }
-        if (Animation == null)
-        {
-            Debug.WriteLine("Tried to draw sprite with null animation.");
-            return;
+            position = Vector2.Zero;
         }
 
         var source = Animation[(int)FrameIndex];
@@ -127,6 +119,7 @@ public class SpriteComponent : Positionable, IComponent
             Animation.Size.X, Animation.Size.Y
         );
         camera.Draw(Sprite.Texture, destination, source, BlendColor);
+        base.Draw(this, camera);
     }
 
     public void SetAnimation(string animationName)
@@ -144,9 +137,6 @@ public class SpriteComponent : Positionable, IComponent
             return;
 
         Animation = animation;
-        if (Animation != null)
-        {
-            FrameIndex = _frameIndex;
-        }
+        FrameIndex = _frameIndex;
     }
 }

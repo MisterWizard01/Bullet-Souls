@@ -1,27 +1,73 @@
 {
-  "Objects": {
-    "players": [
-      {
-        "Name": "player",
-        "Position": "100.5, 23",
-        "Components": {
-          "sprite": {
-            "Type": "Sprite",
-            "SpriteName": "player",
-            "AnimationName": "stand down",
-            "FrameRatio": 0
-          },
-          "playerController": {
-            "Type": "PlayerController",
-            "Speed": 0.75,
-            "DashDistance": 22,
-            "DashCooldown": 20
+  "Children": {
+    "player": {
+      "Type": "Player",
+      "Position": "100.5, 23",
+      "Speed": 0.75,
+      "DashDistance": 22,
+      "DashCooldown": 20,
+      "Children": {
+        "dashTrail0": {
+          "Type": "Sprite",
+          "SpriteName": "player",
+          "AnimationName": "stand down",
+          "Visible": false,
+          "RelativePosition": false,
+          "BlendColor": {
+            "R": 255,
+            "G": 255,
+            "B": 255,
+            "A": 255
           }
+        },
+        "dashTrail1": {
+          "Type": "Sprite",
+          "SpriteName": "player",
+          "AnimationName": "stand down",
+          "Visible": false,
+          "RelativePosition": false,
+          "BlendColor": {
+            "R": 44,
+            "G": 232,
+            "B": 245,
+            "A": 255
+          }
+        },
+        "dashTrail2": {
+          "Type": "Sprite",
+          "SpriteName": "player",
+          "AnimationName": "stand down",
+          "Visible": false,
+          "RelativePosition": false,
+          "BlendColor": {
+            "R": 0,
+            "G": 149,
+            "B": 233,
+            "A": 255
+          }
+        },
+        "dashTrail3": {
+          "Type": "Sprite",
+          "SpriteName": "player",
+          "AnimationName": "stand down",
+          "Visible": false,
+          "RelativePosition": false,
+          "BlendColor": {
+            "R": 18,
+            "G": 78,
+            "B": 137,
+            "A": 255
+          }
+        },
+        "sprite": {
+          "Type": "Sprite",
+          "SpriteName": "player",
+          "AnimationName": "stand down"
         }
       }
-    ],
-    "enemies": [
-      
-    ]
+    },
+    "enemies": {
+
+    }
   }
 }

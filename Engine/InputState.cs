@@ -43,7 +43,7 @@ public struct InputState
 
     public override bool Equals(object? obj)
     {
-        if (!(obj is InputState))
+        if (obj is not InputState)
         {
             return false;
         }

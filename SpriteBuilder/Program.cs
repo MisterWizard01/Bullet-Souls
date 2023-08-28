@@ -1,5 +1,5 @@
 ﻿using Engine;
-using Engine.Components;
+using Engine.Nodes;
 using Engine.Managers;
 using Microsoft.Xna.Framework;
 using Newtonsoft.Json;
@@ -22,14 +22,14 @@ var _directions = new string[]
 
 #region Driver Code
 
-SpriteManager _spriteManager = new SpriteManager();
+var _spriteManager = new SpriteManager();
 
 Console.WriteLine("Enter a sprite file path to load a sprite from JSON or create a new JSON file.");
 Console.ForegroundColor = ConsoleColor.Blue;
 string filePath = Console.ReadLine() ?? "";
 Console.ForegroundColor = ConsoleColor.Gray;
 
-_spriteManager.LoadSprites(filePath);
+//_spriteManager.LoadSprites(filePath);
 Console.WriteLine("Loaded " + _spriteManager.Sprites.Count + " sprite(s).");
 
 while (true)
@@ -51,8 +51,7 @@ while (true)
         break;
     }
 
-    SpriteComponent? sprite;
-    if (!_spriteManager.Sprites.TryGetValue(spriteName, out sprite))
+    if (!_spriteManager.Sprites.TryGetValue(spriteName, out Sprite? sprite))
     {
         if (!GetYN("Couldn't find a sprite called '" + spriteName + "'. Create a new sprite? (y/n)"))
         {
@@ -63,10 +62,7 @@ while (true)
         SaveSpriteJson();
     }
 
-    Console.WriteLine("Texture file path: " + sprite.SpriteName);
-    Console.WriteLine("Offset: " + sprite.Offset);
-    Console.WriteLine("Frame Ratio: " + sprite.FrameRatio);
-    Console.WriteLine("Start Frame: " + sprite.FrameIndex);
+    Console.WriteLine("Texture file path: " + sprite.TextureName);
     Console.WriteLine(sprite.Animations.Count + " animation(s).");
 
     while (true)
@@ -113,7 +109,7 @@ while (true)
 
 #endregion
 
-void AnimationNotFound(SpriteComponent sprite, string animationName)
+void AnimationNotFound(Sprite sprite, string animationName)
 {
     if (!GetYN("Couldn't find an animation called '" + animationName + "'. Create a new animation? (y/n)"))
     {
@@ -137,20 +133,15 @@ void AnimationNotFound(SpriteComponent sprite, string animationName)
 
 #region Builder Functions
 
-SpriteComponent CreateSprite()
+Sprite CreateSprite()
 {
     Console.WriteLine("Texture file path: ");
     Console.ForegroundColor = ConsoleColor.Blue;
     string textureFilePath = Console.ReadLine() ?? "";
     Console.ForegroundColor = ConsoleColor.Gray;
 
-    float offsetX = GetFloat("Offset X: ");
-    float offsetY = GetFloat("Offset Y: ");
-
-    float frameRatio = GetFloat("Frame Ratio: ");
-    float startFrame = GetFloat("Start Frame: ");
-
-    return new SpriteComponent(textureFilePath, new(offsetX, offsetY), Color.White, frameRatio, startFrame);
+    //return new Sprite(textureFilePath, new(offsetX, offsetY), Color.White, frameRatio, startFrame);
+    return new Sprite(textureFilePath);
 }
 
 Animation CreateAnimation()

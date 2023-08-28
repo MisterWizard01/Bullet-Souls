@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Engine.Nodes;
 
 namespace Engine;
 
 public class Collision
 {
-    public static Collision CheckCollision(GameObject enemy, GameObject shot)
+    public static Collision CheckCollision(Node enemy, Node shot)
     {
         throw new NotImplementedException();
     }
 
-    public static List<Collision> CheckCollisions(GameObject[] objects)
+    public static List<Collision> CheckCollisions(Node[] objects)
     {
         throw new NotImplementedException();
     }
