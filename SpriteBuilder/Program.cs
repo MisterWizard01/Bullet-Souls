@@ -29,7 +29,7 @@ Console.ForegroundColor = ConsoleColor.Blue;
 string filePath = Console.ReadLine() ?? "";
 Console.ForegroundColor = ConsoleColor.Gray;
 
-//_spriteManager.LoadSprites(filePath);
+_spriteManager.LoadSpriteData(filePath);
 Console.WriteLine("Loaded " + _spriteManager.Sprites.Count + " sprite(s).");
 
 while (true)

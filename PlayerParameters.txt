@@ -5,3 +5,4 @@ Dash Cooldown
 Dash Distance
 Sprint Speed Multiplier
 Walk Speed
+Parry Window

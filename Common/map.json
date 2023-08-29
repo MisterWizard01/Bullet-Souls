@@ -4,13 +4,15 @@
       "Type": "Player",
       "Position": "100.5, 23",
       "Speed": 0.75,
+      "SprintMultiplier": 1.75,
       "DashDistance": 22,
       "DashCooldown": 20,
+      "ParryWindow": 10,
       "Children": {
         "dashTrail0": {
           "Type": "Sprite",
           "SpriteName": "player",
-          "AnimationName": "stand down",
+          "AnimationName": "dash down",
           "Visible": false,
           "RelativePosition": false,
           "BlendColor": {
@@ -23,7 +25,7 @@
         "dashTrail1": {
           "Type": "Sprite",
           "SpriteName": "player",
-          "AnimationName": "stand down",
+          "AnimationName": "dash down",
           "Visible": false,
           "RelativePosition": false,
           "BlendColor": {
@@ -36,7 +38,7 @@
         "dashTrail2": {
           "Type": "Sprite",
           "SpriteName": "player",
-          "AnimationName": "stand down",
+          "AnimationName": "dash down",
           "Visible": false,
           "RelativePosition": false,
           "BlendColor": {
@@ -49,7 +51,7 @@
         "dashTrail3": {
           "Type": "Sprite",
           "SpriteName": "player",
-          "AnimationName": "stand down",
+          "AnimationName": "dash down",
           "Visible": false,
           "RelativePosition": false,
           "BlendColor": {

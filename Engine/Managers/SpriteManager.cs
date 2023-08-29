@@ -18,6 +18,19 @@ public class SpriteManager
         SpriteNode.SpriteUpdateEvent += OnSpriteUpdate;
     }
 
+    public void LoadSpriteData(string filePath)
+    {
+        using StreamReader reader = new(filePath);
+        var json = reader.ReadToEnd();
+        var sprites = JsonConvert.DeserializeObject<Dictionary<string, Sprite>>(json);
+        if (sprites == null)
+        {
+            Debug.WriteLine("Could not read JSON sprite file.");
+            return;
+        }
+        Sprites = sprites;
+    }
+
     public void LoadSpriteTextures(ContentManager content)
     {
         foreach (var sprite in Sprites.Values)

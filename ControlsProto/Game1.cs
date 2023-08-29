@@ -84,7 +84,8 @@ public class Game1 : Game
         _betterBlend = Content.Load<Effect>("betterBlend");
 
         string commonFolder = FileManager.GetCommonFolder();
-        LoadSprites(Path.Combine(commonFolder, "Data.json"));
+        _spriteManager.LoadSpriteData(Path.Combine(commonFolder, "Data.json"));
+        _spriteManager.LoadSpriteTextures(Content);
         LoadScene(Path.Combine(commonFolder, "map.json"));
     }
 
@@ -169,20 +170,6 @@ public class Game1 : Game
         Point size = new(_camera.GameRect.Width * scale, _camera.GameRect.Height * scale);
         Point location = new((Window.ClientBounds.Width - size.X) / 2, (Window.ClientBounds.Height - size.Y) / 2);
         _camera.ViewRect = new Rectangle(location, size);
-    }
-
-    protected void LoadSprites(string filePath)
-    {
-        using StreamReader reader = new(filePath);
-        var json = reader.ReadToEnd();
-        var sprites = JsonConvert.DeserializeObject<Dictionary<string, Sprite>>(json);
-        if (sprites == null)
-        {
-            Debug.WriteLine("Could not read JSON sprite file.");
-            return;
-        }
-        _spriteManager.Sprites = sprites;
-        _spriteManager.LoadSpriteTextures(Content);
     }
 
     protected void LoadScene(string filePath)
