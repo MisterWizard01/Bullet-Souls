@@ -1,6 +1,6 @@
 ﻿using Engine;
-using Engine.Nodes;
 using Engine.Managers;
+using Engine.Nodes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -22,11 +22,11 @@ public class Game1 : Game
     private SpriteFont _tinyMono, _mostlySans, _blockySans, _basicallyAseprite;
     private Camera _camera;
     private RasterizerState _rasterizerState;
-    private GameObject _player;
-    private GameObject[] _enemies;
+    private Node _player;
+    private Node _enemies;
 
     private readonly InputManager _inputManager;
-    private readonly SpriteManager _spriteManager;
+    private readonly JuicyContentManager _contentManager;
 
     private KeyboardState _prevKeyboardState;
     private int frameNumber;
@@ -39,8 +39,8 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _inputManager = new(InputMode.mouseAndKeyboard);
-        _spriteManager = new();
+        _inputManager = new(InputMode.MouseAndKeyboard);
+        _contentManager = new();
     }
 
     protected override void Initialize()
@@ -96,7 +96,7 @@ public class Game1 : Game
         //Debug.WriteLine("");
 
         //update objects
-        _player.Update(frameNumber, inputState);
+        _player.Update(null, frameNumber, inputState);
         //foreach (var shot in _playerShots)
         //{
         //    shot.Update(frameNumber, inputState);
@@ -105,10 +105,7 @@ public class Game1 : Game
         //{
         //    bullet.Update(frameNumber, inputState);
         //}
-        foreach (var enemy in _enemies)
-        {
-            enemy.Update(frameNumber, inputState);
-        }
+        _enemies.Update(null, frameNumber, inputState);
 
         //detect and handle collisions
         //var enemyCollisions = new List<Collision>();
@@ -132,11 +129,8 @@ public class Game1 : Game
         _spriteBatch.GraphicsDevice.ScissorRectangle = _camera.ViewRect;
 
         _camera.Draw(_background, _camera.GameRect, Color.White);
-        _player.Draw(_camera);
-        foreach (var enemy in _enemies)
-        {
-            enemy.Draw(_camera);
-        }
+        _player.Draw(null, _camera);
+        _enemies.Draw(null, _camera);
         
         _spriteBatch.End();
         base.Draw(gameTime);
@@ -179,23 +173,23 @@ public class Game1 : Game
             Debug.WriteLine("Could not read JSON sprite file.");
             return;
         }
-        _spriteManager.Sprites = sprites;
-        _spriteManager.LoadSpriteTextures(Content);
+        _contentManager.Sprites = sprites;
+        _contentManager.LoadTextures(Content, "Textures.json");
     }
 
     protected void LoadScene(string filePath)
     {
         using StreamReader reader = new(filePath);
         var json = reader.ReadToEnd();
-        var scene = JsonConvert.DeserializeObject<Scene>(json);
+        var scene = JsonConvert.DeserializeObject<Node>(json);
         if (scene == null)
         {
             Debug.WriteLine("Could not read JSON sprite file.");
             return;
         }
 
-        _player = scene.Objects["players"][0];
-        _enemies = scene.Objects["enemies"];
+        _player = scene.GetChild("player");
+        _enemies = scene.GetChild("enemies");
     }
 
     protected void TestTextRendering()

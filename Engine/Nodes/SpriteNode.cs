@@ -30,6 +30,8 @@ public class SpriteNode : PositionableNode
     public Sprite? Sprite { get; set; }
     [JsonIgnore]
     public Animation? Animation { get; private set; }
+    [JsonIgnore]
+    public string AnimationName { get; private set; }
 
     /// <summary>
     /// Signals that this SpriteComponent needs its Sprite updated.
@@ -137,6 +139,7 @@ public class SpriteNode : PositionableNode
             return;
 
         Animation = animation;
+        AnimationName = animationName;
         FrameIndex = _frameIndex;
     }
 }

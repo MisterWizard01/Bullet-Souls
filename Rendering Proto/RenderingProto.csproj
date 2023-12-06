@@ -24,8 +24,12 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Engine\Engine.csproj" />
-    <ProjectReference Include="..\SpriteBuilder\SpriteBuilder.csproj" />
+    <Reference Include="Engine">
+      <HintPath>..\..\JuiceEngine\Engine\bin\Debug\net6.0\Engine.dll</HintPath>
+    </Reference>
+    <Reference Include="SpriteBuilder">
+      <HintPath>..\..\JuiceEngine\SpriteBuilder\bin\Debug\net6.0\SpriteBuilder.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
     <Message Text="Restoring dotnet tools" Importance="High" />

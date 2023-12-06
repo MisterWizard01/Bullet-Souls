@@ -8,24 +8,25 @@ public class PlayerNode : PositionableNode
 {
     public enum PlayerStates
     {
-        main,
-        dash,
-        recover,
-        sprint,
-        //slide,
-        parry
+        Main,
+        Dash,
+        Recover,
+        Sprint,
+        Slide,
+        Parry
     }
 
     private Vector2 _prevMove;
     private InputState _prevState;
-    private int _slowFrames, _parryFrames;
-    //private Vector2 _slideVector;
+    private int _slowFrames, _parryFrames, _sprintFrames;
+    private Vector2 _slideVector;
     private PlayerStates _state;
     private SpriteNode? _sprite;
-    private SpriteNode?[] _dashTrail;
+    private readonly SpriteNode?[] _dashTrail;
 
     public float Speed { get; set; }
-    public float SprintMultiplier { get; set; }
+    public float SprintBaseSpeed { get; set; }
+    public float SprintAcceleration { get; set; }
     public Vector2 Facing { get; set; }
     public float WeaponCharge { get; set; }
     public float DashDistance { get; set; }
@@ -54,13 +55,17 @@ public class PlayerNode : PositionableNode
         var facingVector = Get2DInputVector(inputState, InputSignal.HorizontalFacing, InputSignal.VerticalFacing, true);
 
         UpdateState(moveInputVector, pressingDash, holdingDash);
-        //var moveVector = _state == PlayerStates.slide ? _slideVector : moveInputVector * SpeedThisFrame();
         var moveVector = moveInputVector * SpeedThisFrame();
-        //Debug.WriteLine(_slideVector);
+        if (_state == PlayerStates.Slide)
+        {
+            moveVector += _slideVector;
+        }
         Move(moveVector);
 
         //Update Facing
-        if (facingVector.LengthSquared() == 0 && inputState[InputSignal.Strafe] == 0)
+        if (_state == PlayerStates.Sprint
+            || facingVector.LengthSquared() == 0
+            && inputState[InputSignal.Strafe] == 0)
         {
             facingVector = moveVector;
         }
@@ -70,12 +75,7 @@ public class PlayerNode : PositionableNode
         }
 
         UpdateAnimations(moveVector.Length());
-        if (_state == PlayerStates.dash || _state == PlayerStates.sprint)
-        {
-            LeaveDashTrail(moveVector);
-        }
-        var trailFade = _state == PlayerStates.parry ? (float)_parryFrames / ParryWindow : (float)_slowFrames / DashCooldown;
-        UpdateDashTrail(trailFade);
+        UpdateTrail(moveVector);
 
         _prevState = inputState;
         base.Update(this, frameNumber, inputState);
@@ -93,45 +93,52 @@ public class PlayerNode : PositionableNode
     {
         switch (_state)
         {
-            case PlayerStates.main:
+            case PlayerStates.Main:
                 if (!pressingDash || holdingDash)
                     break;
                 if (moveInputVector.LengthSquared() == 0)
                 {
-                    _state = PlayerStates.parry;
+                    _state = PlayerStates.Parry;
                     _parryFrames = ParryWindow;
                     break;
                 }
-                _state = PlayerStates.dash;
+                _state = PlayerStates.Dash;
                 break;
-            case PlayerStates.dash:
-                _state = PlayerStates.recover;
+
+            case PlayerStates.Dash:
+                _state = PlayerStates.Recover;
                 _slowFrames = DashCooldown;
                 break;
-            case PlayerStates.recover:
-                _slowFrames -= 1;
+
+            case PlayerStates.Recover:
+                _slowFrames--;
                 if (_slowFrames > 0)
                     break;
-                _state = pressingDash && holdingDash ? PlayerStates.sprint : PlayerStates.main;
+                LeaveDashTrail(Vector2.Zero); //reset all trail sprites back to 0,0
+                _state = pressingDash && holdingDash ? PlayerStates.Sprint : PlayerStates.Main;
                 break;
-            case PlayerStates.sprint:
+
+            case PlayerStates.Sprint:
+                _sprintFrames++;
                 if (pressingDash && holdingDash && moveInputVector.LengthSquared() > 0)
                     break;
-                _state = PlayerStates.main;
-                //_state = PlayerStates.slide;
-                //_slideVector = _prevMove;
+                _sprintFrames = 0;
+                _state = PlayerStates.Slide;
+                _slideVector = _prevMove;
                 break;
-            //case PlayerStates.slide:
-            //    if (_slideVector.Length() > 0.01)
-            //        break;
-            //    _state = PlayerStates.main;
-            //    break;
-            case PlayerStates.parry:
-                _parryFrames -= 1;
-                Debug.WriteLine("Parrying");
+
+            case PlayerStates.Slide:
+                if (_slideVector.Length() > 0.01)
+                    break;
+                _slideVector = Vector2.Zero;
+                _state = PlayerStates.Main;
+                break;
+
+            case PlayerStates.Parry:
+                _parryFrames--;
                 if (_parryFrames > 0)
                     break;
-                _state = PlayerStates.main;
+                _state = PlayerStates.Main;
                 break;
         }
     }
@@ -146,7 +153,7 @@ public class PlayerNode : PositionableNode
         }
         if (eightDirectional && vectorLength > 0)
         {
-            var angle = MathF.Atan2(vector.Y, vector.X);
+            var angle = MathHelper.VectorToAngle(vector);
             angle = MathHelper.Snap(angle, MathF.PI / 4);
             vector = MathHelper.AngleToVector(angle);
         }
@@ -158,25 +165,27 @@ public class PlayerNode : PositionableNode
     {
         return _state switch
         {
-            PlayerStates.main => Speed,
-            PlayerStates.dash => DashDistance,
-            PlayerStates.recover => Speed / 2,
-            PlayerStates.sprint => Speed * SprintMultiplier,
-            PlayerStates.parry => 0,
+            PlayerStates.Main => Speed,
+            PlayerStates.Dash => DashDistance,
+            PlayerStates.Recover => Speed / 2,
+            PlayerStates.Sprint => SprintBaseSpeed + _sprintFrames * SprintAcceleration,
+            PlayerStates.Parry => 0,
             _ => Speed,
         };
     }
 
     private void Move(Vector2 moveVector)
     {
-        if (moveVector != _prevMove)
+        var angleDiff = MathHelper.AngleDifference(MathHelper.VectorToAngle(moveVector), MathHelper.VectorToAngle(_prevMove));
+        if (_prevMove.LengthSquared() > 0
+            && angleDiff > MathF.PI / 8)
         {
             X = (float)Math.Floor(X);
             Y = (float)Math.Floor(Y);
         }
         Position += moveVector;
 
-        //_slideVector /= 1.5f;
+        _slideVector /= 1.1f;
         _prevMove = moveVector;
     }
 
@@ -190,12 +199,53 @@ public class PlayerNode : PositionableNode
         {
             animationName = "walk ";
         }
-        if (_state == PlayerStates.dash)
+        if (_state == PlayerStates.Dash || _state == PlayerStates.Sprint)
         {
             animationName = "dash ";
         }
         _sprite.SetAnimation(animationName + SpriteManager.DirectionString8(Facing));
         _sprite.FrameRatio = walkSpeed / 3;
+        
+        if (_state != PlayerStates.Parry)
+        {
+            _sprite.BlendColor = Color.Transparent;
+        }
+    }
+
+    private void UpdateTrail(Vector2 moveVector)
+    {
+        var trailCooldown = 0f;
+        switch (_state)
+        {
+            case PlayerStates.Main:
+
+                break;
+            case PlayerStates.Dash:
+                LeaveDashTrail(moveVector);
+                trailCooldown = 1;
+                break;
+            case PlayerStates.Recover:
+                trailCooldown = (float)_slowFrames / DashCooldown;
+                break;
+            case PlayerStates.Sprint:
+                LeaveSprintTrail(moveVector);
+                trailCooldown = 1;
+                break;
+            case PlayerStates.Parry:
+                var parryColorIndex = _dashTrail.Length * _parryFrames / (ParryWindow + 1);
+                if (_sprite is null)
+                    break;
+                _sprite.BlendColor = _dashTrail[parryColorIndex]?.BlendColor ?? Color.Transparent;
+                break;
+        }
+
+        for (int i = 0; i < _dashTrail!.Length; i++)
+        {
+            if (_dashTrail[i] is null)
+                continue;
+
+            _dashTrail[i]!.Visible = trailCooldown >= (float)(i + 1) / (_dashTrail.Length + 1);
+        }
     }
 
     private void LeaveDashTrail(Vector2 moveVector)
@@ -214,15 +264,21 @@ public class PlayerNode : PositionableNode
         SpriteManager.YSortChildren(this);
     }
 
-    private void UpdateDashTrail(float percentFade)
+    private void LeaveSprintTrail(Vector2 moveVector)
     {
-        for (int i = 0; i < _dashTrail!.Length; i++)
+        for (int i = _dashTrail.Length - 1; i > 0; i--)
         {
-            if (_dashTrail[i] is null)
+            if (_dashTrail[i] is null || _dashTrail[i - 1] is null)
                 continue;
-
-            _dashTrail[i]!.Visible = percentFade >= (float)(i + 1) / (_dashTrail.Length + 1);
+            _dashTrail[i]!.Position = _dashTrail[i - 1]!.Position;
+            _dashTrail[i]!.SetAnimation(_dashTrail[i - 1]!.AnimationName);
         }
+
+        if (_dashTrail[0] is null)
+            return;
+        _dashTrail[0]!.Position = Position - 4 * moveVector / _dashTrail.Length;
+        _dashTrail[0]!.SetAnimation(_sprite?.AnimationName ?? "");
+        SpriteManager.YSortChildren(this);
     }
 
     public override void AddChild(string name, Node child)

@@ -1,6 +1,6 @@
 {
   "player": {
-    "TextureName": "animation practice w gun-Sheet",
+    "TextureName": "player",
     "Animations": {
       "stand down": {
         "Frames": [
@@ -541,7 +541,7 @@
     }
   },
   "enemy": {
-    "TextureName": "animation practice w gun-Sheet",
+    "TextureName": "player",
     "Animations": {
       "stand down": {
         "Frames": [

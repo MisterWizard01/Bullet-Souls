@@ -3,8 +3,9 @@
     "player": {
       "Type": "Player",
       "Position": "100.5, 23",
-      "Speed": 0.75,
-      "SprintMultiplier": 1.75,
+      "Speed": 0.8,
+      "SprintBaseSpeed": 1.5,
+      "SprintAcceleration": 0.002,
       "DashDistance": 22,
       "DashCooldown": 20,
       "ParryWindow": 10,

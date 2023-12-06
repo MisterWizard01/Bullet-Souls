@@ -5,10 +5,6 @@ VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenderingProto", "Rendering Proto\RenderingProto.csproj", "{9D8708A9-FC04-46AF-8100-B9CB66205300}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine", "Engine\Engine.csproj", "{900E9666-77B6-43B7-9915-A35174088CA9}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SpriteBuilder", "SpriteBuilder\SpriteBuilder.csproj", "{CC75F95A-978A-4B5E-AB76-2263C8954D51}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlsProto", "ControlsProto\ControlsProto.csproj", "{181E1DD2-03E4-4F34-8346-8DBF52E3E7C4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1A9F9922-2836-4CCE-9772-F85B3A8139E7}"
@@ -16,6 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Common\Data.json = Common\Data.json
 		Common\map.json = Common\map.json
 		PlayerParameters.txt = PlayerParameters.txt
+		Common\Sprites.json = Common\Sprites.json
+		Common\test.json = Common\test.json
+		Textures.json = Textures.json
 	EndProjectSection
 EndProject
 Global
@@ -28,14 +27,6 @@ Global
 		{9D8708A9-FC04-46AF-8100-B9CB66205300}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9D8708A9-FC04-46AF-8100-B9CB66205300}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9D8708A9-FC04-46AF-8100-B9CB66205300}.Release|Any CPU.Build.0 = Release|Any CPU
-		{900E9666-77B6-43B7-9915-A35174088CA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{900E9666-77B6-43B7-9915-A35174088CA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{900E9666-77B6-43B7-9915-A35174088CA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{900E9666-77B6-43B7-9915-A35174088CA9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CC75F95A-978A-4B5E-AB76-2263C8954D51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CC75F95A-978A-4B5E-AB76-2263C8954D51}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CC75F95A-978A-4B5E-AB76-2263C8954D51}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CC75F95A-978A-4B5E-AB76-2263C8954D51}.Release|Any CPU.Build.0 = Release|Any CPU
 		{181E1DD2-03E4-4F34-8346-8DBF52E3E7C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{181E1DD2-03E4-4F34-8346-8DBF52E3E7C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{181E1DD2-03E4-4F34-8346-8DBF52E3E7C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
