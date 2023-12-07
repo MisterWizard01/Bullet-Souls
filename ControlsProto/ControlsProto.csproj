@@ -24,6 +24,9 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\BulletSoulsLibrary\BulletSoulsLibrary.csproj" />
+  </ItemGroup>
+  <ItemGroup>
     <Reference Include="Engine">
       <HintPath>..\..\JuiceEngine\Engine\bin\Debug\net6.0\Engine.dll</HintPath>
     </Reference>

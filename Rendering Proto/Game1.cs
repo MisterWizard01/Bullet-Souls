@@ -129,8 +129,8 @@ public class Game1 : Game
         _spriteBatch.GraphicsDevice.ScissorRectangle = _camera.ViewRect;
 
         _camera.Draw(_background, _camera.GameRect, Color.White);
-        _player.Draw(null, _camera);
-        _enemies.Draw(null, _camera);
+        _player.Draw(null, _camera, Vector2.Zero);
+        _enemies.Draw(null, _camera, Vector2.Zero);
         
         _spriteBatch.End();
         base.Draw(gameTime);

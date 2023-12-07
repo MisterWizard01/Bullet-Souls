@@ -1,10 +1,13 @@
-﻿using Engine.Managers;
+﻿using Engine;
+using Engine.Managers;
+using Engine.Nodes;
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
+using MathHelper = Engine.MathHelper;
 
-namespace Engine.Nodes;
+namespace BulletSoulsLibrary;
 
-public class PlayerNode : PositionableNode
+public class PlayerNode : Node2D
 {
     public enum PlayerStates
     {
@@ -33,17 +36,20 @@ public class PlayerNode : PositionableNode
     public int DashCooldown { get; set; }
     public int ParryWindow { get; set; }
 
-    public PlayerNode(Dictionary<string, Node> children)
-        : base(children)
+    public PlayerNode() : base()
     {
         Facing = new(-1, 1);
         Facing.Normalize();
         _prevState = new();
-        _sprite = children["sprite"] as SpriteNode;
+        _sprite = GetChild("sprite") as SpriteNode;
         _dashTrail = new SpriteNode[4];
+    }
+
+    public override void Initialize()
+    {
         for (int i = 0; i < 4; i++)
         {
-            _dashTrail[i] = children["dashTrail" + i] as SpriteNode;
+            _dashTrail[i] = GetChild("dashTrail" + i) as SpriteNode;
         }
     }
 
@@ -81,9 +87,9 @@ public class PlayerNode : PositionableNode
         base.Update(this, frameNumber, inputState);
     }
 
-    public override void Draw(Node parent, Camera camera)
+    public override void Draw(Node parent, Camera camera, Vector2 referencePoint)
     {
-        base.Draw(this, camera);
+        base.Draw(this, camera, referencePoint);
 
         //TODO: maybe draw an input display for debugging?
         //TODO: draw hud
@@ -203,7 +209,7 @@ public class PlayerNode : PositionableNode
         {
             animationName = "dash ";
         }
-        _sprite.SetAnimation(animationName + SpriteManager.DirectionString8(Facing));
+        _sprite.SetAnimation(animationName + JuicyContentManager.DirectionString8(Facing));
         _sprite.FrameRatio = walkSpeed / 3;
         
         if (_state != PlayerStates.Parry)
@@ -255,13 +261,13 @@ public class PlayerNode : PositionableNode
             if (_dashTrail[i] is null)
                 continue;
 
-            _dashTrail[i]!.Position = Position - moveVector * (i + 1) / _dashTrail.Length;
+            _dashTrail[i]!.Position = -moveVector * (i + 1) / _dashTrail.Length;
             _dashTrail[i]!.Visible = true;
             var animationName = moveVector.LengthSquared() > 0 ? "dash " : "stand ";
-            _dashTrail[i]!.SetAnimation(animationName + SpriteManager.DirectionString8(moveVector));
+            _dashTrail[i]!.SetAnimation(animationName + JuicyContentManager.DirectionString8(moveVector));
         }
 
-        SpriteManager.YSortChildren(this);
+        JuicyContentManager.YSortChildren(this);
     }
 
     private void LeaveSprintTrail(Vector2 moveVector)
@@ -270,15 +276,15 @@ public class PlayerNode : PositionableNode
         {
             if (_dashTrail[i] is null || _dashTrail[i - 1] is null)
                 continue;
-            _dashTrail[i]!.Position = _dashTrail[i - 1]!.Position;
+            _dashTrail[i]!.Position = _dashTrail[i - 1]!.Position - moveVector;
             _dashTrail[i]!.SetAnimation(_dashTrail[i - 1]!.AnimationName);
         }
 
         if (_dashTrail[0] is null)
             return;
-        _dashTrail[0]!.Position = Position - 4 * moveVector / _dashTrail.Length;
+        _dashTrail[0]!.Position = -4 * moveVector / _dashTrail.Length;
         _dashTrail[0]!.SetAnimation(_sprite?.AnimationName ?? "");
-        SpriteManager.YSortChildren(this);
+        JuicyContentManager.YSortChildren(this);
     }
 
     public override void AddChild(string name, Node child)
