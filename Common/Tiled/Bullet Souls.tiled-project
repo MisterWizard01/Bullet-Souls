@@ -1,0 +1,48 @@
+{
+    "automappingRulesFile": "",
+    "commands": [
+    ],
+    "compatibilityVersion": 1100,
+    "extensionsPath": "extensions",
+    "folders": [
+        "."
+    ],
+    "properties": [
+    ],
+    "propertyTypes": [
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 1,
+            "members": [
+                {
+                    "name": "AnimationName",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "BlendColor",
+                    "type": "color",
+                    "value": "#00000000"
+                },
+                {
+                    "name": "SpriteName",
+                    "type": "string",
+                    "value": ""
+                },
+                {
+                    "name": "Visible",
+                    "type": "bool",
+                    "value": true
+                }
+            ],
+            "name": "Sprite",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object",
+                "project"
+            ]
+        }
+    ]
+}

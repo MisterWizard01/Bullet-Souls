@@ -1,7 +1,6 @@
 {
   "player": {
-    "Offset": "0, 0",
-    "TextureName": "animation practice w gun-Sheet",
+    "TextureName": "player",
     "Animations": {
       "stand down": {
         "Frames": [
@@ -434,12 +433,115 @@
           "X": 16,
           "Y": 16
         }
+      },
+      "dash down": {
+        "Frames": [
+          {
+            "X": 0,
+            "Y": 144
+          }
+        ],
+        "EndAction": 0,
+        "Size": {
+          "X": 16,
+          "Y": 16
+        }
+      },
+      "dash downright": {
+        "Frames": [
+          {
+            "X": 16,
+            "Y": 144
+          }
+        ],
+        "EndAction": 0,
+        "Size": {
+          "X": 16,
+          "Y": 16
+        }
+      },
+      "dash right": {
+        "Frames": [
+          {
+            "X": 32,
+            "Y": 144
+          }
+        ],
+        "EndAction": 0,
+        "Size": {
+          "X": 16,
+          "Y": 16
+        }
+      },
+      "dash upright": {
+        "Frames": [
+          {
+            "X": 48,
+            "Y": 144
+          }
+        ],
+        "EndAction": 0,
+        "Size": {
+          "X": 16,
+          "Y": 16
+        }
+      },
+      "dash up": {
+        "Frames": [
+          {
+            "X": 64,
+            "Y": 144
+          }
+        ],
+        "EndAction": 0,
+        "Size": {
+          "X": 16,
+          "Y": 16
+        }
+      },
+      "dash upleft": {
+        "Frames": [
+          {
+            "X": 80,
+            "Y": 144
+          }
+        ],
+        "EndAction": 0,
+        "Size": {
+          "X": 16,
+          "Y": 16
+        }
+      },
+      "dash left": {
+        "Frames": [
+          {
+            "X": 96,
+            "Y": 144
+          }
+        ],
+        "EndAction": 0,
+        "Size": {
+          "X": 16,
+          "Y": 16
+        }
+      },
+      "dash downleft": {
+        "Frames": [
+          {
+            "X": 112,
+            "Y": 144
+          }
+        ],
+        "EndAction": 0,
+        "Size": {
+          "X": 16,
+          "Y": 16
+        }
       }
     }
   },
   "enemy": {
-    "Offset": "0, 0",
-    "TextureName": "animation practice w gun-Sheet",
+    "TextureName": "player",
     "Animations": {
       "stand down": {
         "Frames": [

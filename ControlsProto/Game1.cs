@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Nodes;
 using Engine.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,6 +9,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Newtonsoft.Json.Linq;
+using BulletSoulsLibrary;
 
 namespace ControlsProto;
 
@@ -19,14 +22,16 @@ public class Game1 : Game
     private Texture2D _background, _whitePixel;
     private Camera _camera;
     private RasterizerState _rasterizerState;
-    private GameObject _player;
-    private GameObject[] _enemies;
+    private PlayerNode _player;
+    private Node _enemies;
 
     private readonly InputManager _inputManager;
-    private readonly SpriteManager _spriteManager;
+    private readonly JuicyContentManager _contentManager;
 
     private KeyboardState _prevKeyboardState;
     private int frameNumber;
+    //private Effect _grayscaleEffect, _silhouetteEffect;
+    private Effect _betterBlend;
 
     public Game1()
     {
@@ -36,21 +41,31 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        _inputManager = new(InputMode.mouseAndKeyboard);
-        _spriteManager = new();
+        _inputManager = new(InputMode.MouseAndKeyboard);
+        _contentManager = new();
     }
 
     protected override void Initialize()
     {
-        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
-        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
-        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.HorizontalFacing, new MouseAxisInput(MouseAxes.MouseX));
-        _inputManager.SetBinding(InputMode.mouseAndKeyboard, InputSignal.VerticalFacing, new MouseAxisInput(MouseAxes.MouseY));
+        _inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
+        _inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
+        _inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.HorizontalFacing, new KeyInput(Keys.Left, Keys.Right));
+        _inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.VerticalFacing, new KeyInput(Keys.Up, Keys.Down));
+        _inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.Strafe, new KeyInput(Keys.LeftShift));
+        _inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.Dash, new KeyInput(Keys.Space));
 
+        _inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
+        _inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
+        _inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.HorizontalFacing, new MouseAxisInput(MouseAxes.MouseX));
+        _inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.VerticalFacing, new MouseAxisInput(MouseAxes.MouseY));
+        _inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.Dash, new KeyInput(Keys.Space));
+        
         _inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalMovement, new GamePadAxisInput(GamePadAxes.LeftStickX));
         _inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalMovement, new GamePadAxisInput(GamePadAxes.LeftStickY, true));
         _inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalFacing, new GamePadAxisInput(GamePadAxes.RightStickX));
         _inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalFacing, new GamePadAxisInput(GamePadAxes.RightStickY, true));
+        _inputManager.SetBinding(InputMode.XBoxController, InputSignal.Strafe, new GamePadButtonInput(Buttons.LeftTrigger));
+        _inputManager.SetBinding(InputMode.XBoxController, InputSignal.Dash, new GamePadButtonInput(Buttons.B));
 
         base.Initialize();
 
@@ -65,11 +80,15 @@ public class Game1 : Game
         _whitePixel = new Texture2D(GraphicsDevice, 1, 1);
         _whitePixel.SetData(new Color[] { Color.White });
 
-        _background = Content.Load<Texture2D>("Bullet Souls mockup 1");
+        //_grayscaleEffect = Content.Load<Effect>("grayscale");
+        //_silhouetteEffect = Content.Load<Effect>("silhouette");
+        _betterBlend = Content.Load<Effect>("betterBlend");
 
         string commonFolder = FileManager.GetCommonFolder();
-        LoadSprites(Path.Combine(commonFolder, "Data.json"));
-        LoadScene(Path.Combine(commonFolder, "map.json"));
+        _contentManager.LoadTextures(Content, Path.Combine(commonFolder, "Textures.json"));
+        _contentManager.LoadSprites(Path.Combine(commonFolder, "Sprites.json"));
+        LoadSceneFromTiled(Path.Combine(commonFolder, "tiled\\test.json"));
+        _background = _contentManager.Textures["background"];
     }
 
     protected override void Update(GameTime gameTime)
@@ -78,41 +97,14 @@ public class Game1 : Game
         KeyboardState keyboardState = Keyboard.GetState();
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboardState.IsKeyDown(Keys.Escape))
             Exit();
-        if (keyboardState.IsKeyDown(Keys.Space) && _prevKeyboardState.IsKeyUp(Keys.Space))
+        if (keyboardState.IsKeyDown(Keys.F1) && _prevKeyboardState.IsKeyUp(Keys.F1))
             ToggleFullScreen();
         _inputManager.Update(_camera.GameToView(_player.Position));
         var inputState = _inputManager.InputState;
 
-        //var signals = inputState.GetInputs();
-        //foreach (var signal in signals)
-        //{
-        //    Debug.Write(signal + " ");
-        //}
-        //Debug.WriteLine("");
-
         //update objects
-        _player.Update(frameNumber, inputState);
-        //foreach (var shot in _playerShots)
-        //{
-        //    shot.Update(frameNumber, inputState);
-        //}
-        //foreach (var bullet in _bullets)
-        //{
-        //    bullet.Update(frameNumber, inputState);
-        //}
-        foreach (var enemy in _enemies)
-        {
-            enemy.Update(frameNumber, inputState);
-        }
-
-        //detect and handle collisions
-        //var enemyCollisions = new List<Collision>();
-        //enemyCollisions.AddRange(Collision.CheckCollisions(_enemies));
-        //Collision.SortCollisions(enemyCollisions);
-        //foreach (var collision in enemyCollisions)
-        //{
-
-        //}
+        _player.Update(null, frameNumber, inputState);
+        _enemies.Update(null, frameNumber, inputState);
 
         //ready next frame
         _prevKeyboardState = keyboardState;
@@ -123,15 +115,17 @@ public class Game1 : Game
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.Black);
-        _spriteBatch.Begin(samplerState: SamplerState.PointClamp, rasterizerState: _rasterizerState);
+        _spriteBatch.Begin(
+            samplerState: SamplerState.PointClamp,
+            rasterizerState: _rasterizerState,
+            effect: _betterBlend,
+            blendState: BlendState.NonPremultiplied
+        );
         _spriteBatch.GraphicsDevice.ScissorRectangle = _camera.ViewRect;
 
-        _camera.Draw(_background, _camera.GameRect, Color.White);
-        _player.Draw(_camera);
-        foreach (var enemy in _enemies)
-        {
-            enemy.Draw(_camera);
-        }
+        _camera.Draw(_background, _camera.GameRect, Color.Transparent);
+        _player.Draw(null, _camera, Vector2.Zero);
+        _enemies.Draw(null, _camera, Vector2.Zero);
 
         _spriteBatch.End();
         base.Draw(gameTime);
@@ -164,32 +158,36 @@ public class Game1 : Game
         _camera.ViewRect = new Rectangle(location, size);
     }
 
-    protected void LoadSprites(string filePath)
-    {
-        using StreamReader reader = new(filePath);
-        var json = reader.ReadToEnd();
-        var sprites = JsonConvert.DeserializeObject<Dictionary<string, Sprite>>(json);
-        if (sprites == null)
-        {
-            Debug.WriteLine("Could not read JSON sprite file.");
-            return;
-        }
-        _spriteManager.Sprites = sprites;
-        _spriteManager.LoadSpriteTextures(Content);
-    }
-
     protected void LoadScene(string filePath)
     {
         using StreamReader reader = new(filePath);
         var json = reader.ReadToEnd();
-        var scene = JsonConvert.DeserializeObject<Scene>(json);
+        var scene = JsonConvert.DeserializeObject<Node>(json);
         if (scene == null)
         {
             Debug.WriteLine("Could not read JSON sprite file.");
             return;
         }
 
-        _player = scene.Objects["players"][0];
-        _enemies = scene.Objects["enemies"];
+        //_player = scene.GetChild("player") as PlayerNode;
+        _enemies = scene.GetChild("enemies");
+    }
+
+    protected void LoadSceneFromTiled(string filePath)
+    {
+        using StreamReader reader = new(filePath);
+        var json = reader.ReadToEnd();
+        var jObject = JObject.Parse(json);
+        var scene = TiledParser.ParseMap(_contentManager, jObject);
+        if (scene == null)
+        {
+            Debug.WriteLine("Could not read JSON sprite file.");
+            return;
+        }
+
+        _player = scene.GetChild("Player").GetChild("player") as PlayerNode;
+        _enemies = new Node();
+
+        _player.Initialize();
     }
 }

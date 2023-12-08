@@ -1,0 +1,8 @@
+Parameters that describe player behavior, in order of appearance in PlayerComponent.Update().
+
+Dash Recovery Speed Multiplier
+Dash Cooldown
+Dash Distance
+Sprint Speed Multiplier
+Walk Speed
+Parry Window
