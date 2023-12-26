@@ -43,6 +43,40 @@
                 "object",
                 "project"
             ]
+        },
+        {
+            "color": "#ffa0a0a4",
+            "drawFill": true,
+            "id": 2,
+            "members": [
+                {
+                    "name": "Height",
+                    "type": "float",
+                    "value": 0
+                },
+                {
+                    "name": "Width",
+                    "type": "float",
+                    "value": 0
+                },
+                {
+                    "name": "XOffset",
+                    "type": "float",
+                    "value": 0
+                },
+                {
+                    "name": "YOffset",
+                    "type": "float",
+                    "value": 0
+                }
+            ],
+            "name": "Collider",
+            "type": "class",
+            "useAs": [
+                "property",
+                "object",
+                "project"
+            ]
         }
     ]
 }

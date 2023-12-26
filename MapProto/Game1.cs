@@ -1,47 +1,40 @@
-﻿using Engine;
-using Engine.Nodes;
+﻿using BulletSoulsLibrary;
+using Engine;
 using Engine.Managers;
+using Engine.Nodes;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using Newtonsoft.Json.Linq;
-using BulletSoulsLibrary;
 
-namespace ControlsProto;
+namespace MapProto;
 
 public class Game1 : Game
 {
-    private readonly GraphicsDeviceManager _graphics;
+    private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
-
-    private Texture2D _background, _whitePixel;
-    private Camera _camera;
     private RasterizerState _rasterizerState;
-    private PlayerNode _player;
-    private Node _enemies;
-
     private readonly InputManager _inputManager;
     private readonly JuicyContentManager _contentManager;
     private readonly CustomTiledParser _tiledParser;
 
+    private Effect _betterBlend;
+    private Camera _camera;
+    private PlayerNode _player;
+    private Node _tileLayers;
+
     private KeyboardState _prevKeyboardState;
     private int frameNumber;
-    //private Effect _grayscaleEffect, _silhouetteEffect;
-    private Effect _betterBlend;
 
     public Game1()
     {
-        _graphics = new GraphicsDeviceManager(this);
-        Window.AllowUserResizing = true;
-        Window.ClientSizeChanged += OnResizeWindow;
+        _graphics = new(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-
         _inputManager = new(InputMode.MouseAndKeyboard);
         _contentManager = new();
         _tiledParser = new();
@@ -50,44 +43,43 @@ public class Game1 : Game
     protected override void Initialize()
     {
         PlayerNode.DefaultControls(_inputManager);
-        base.Initialize();
-
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _camera = new(_spriteBatch, new Rectangle(0, 0, 192, 144));
         _rasterizerState = new() { ScissorTestEnable = true };
         OnResizeWindow(null, null);
+        frameNumber = 0;
+
+        base.Initialize();
     }
 
     protected override void LoadContent()
     {
-        _whitePixel = new Texture2D(GraphicsDevice, 1, 1);
-        _whitePixel.SetData(new Color[] { Color.White });
+        var whitePixel = new Texture2D(GraphicsDevice, 1, 1);
+        whitePixel.SetData(new Color[] { Color.White });
+        _contentManager.Textures.Add("whitePixel", whitePixel);
 
-        //_grayscaleEffect = Content.Load<Effect>("grayscale");
-        //_silhouetteEffect = Content.Load<Effect>("silhouette");
         _betterBlend = Content.Load<Effect>("betterBlend");
 
-        string commonFolder = FileManager.GetCommonFolder();
+        var commonFolder = FileManager.GetCommonFolder();
         _contentManager.LoadTextures(Content, FileManager.GetContentFolder());
         _contentManager.LoadSprites(Path.Combine(commonFolder, "Sprites.json"));
+        _contentManager.LoadTilesets(Path.Combine(commonFolder, "Tilesets.json"));
+        //LoadSceneFromSave(Path.Combine(commonFolder, "data\\map.json"));
         LoadSceneFromTiled(Path.Combine(commonFolder, "tiled\\test.json"));
-        _background = _contentManager.Textures["background"];
     }
 
     protected override void Update(GameTime gameTime)
     {
-        //recieve inputs
         KeyboardState keyboardState = Keyboard.GetState();
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboardState.IsKeyDown(Keys.Escape))
             Exit();
-        if (keyboardState.IsKeyDown(Keys.F1) && _prevKeyboardState.IsKeyUp(Keys.F1))
-            ToggleFullScreen();
+        //if (keyboardState.IsKeyDown(Keys.F1) && _prevKeyboardState.IsKeyUp(Keys.F1))
+        //    ToggleFullScreen();
         _inputManager.Update(_camera.GameToView(_player.Position));
         var inputState = _inputManager.InputState;
 
         //update objects
         _player.Update(null, frameNumber, inputState);
-        _enemies.Update(null, frameNumber, inputState);
 
         //ready next frame
         _prevKeyboardState = keyboardState;
@@ -106,29 +98,39 @@ public class Game1 : Game
         );
         _spriteBatch.GraphicsDevice.ScissorRectangle = _camera.ViewRect;
 
-        _camera.Draw(_background, _camera.GameRect, Color.Transparent);
+        _camera.Draw(_contentManager.Textures["whitePixel"], _camera.GameRect, new(38, 92, 66)); // dark green
+        _tileLayers.Draw(null, _camera, Vector2.Zero);
+
         _player.Draw(null, _camera, Vector2.Zero);
-        _enemies.Draw(null, _camera, Vector2.Zero);
 
         _spriteBatch.End();
         base.Draw(gameTime);
     }
 
-    protected void ToggleFullScreen()
+    protected void LoadSceneFromTiled(string filePath)
     {
-        _graphics.IsFullScreen = !_graphics.IsFullScreen;
-        if (_graphics.IsFullScreen)
+        using StreamReader reader = new(filePath);
+        var json = reader.ReadToEnd();
+        var jObject = JObject.Parse(json);
+
+        var scene = _tiledParser.ParseMap(_contentManager, jObject);
+        if (scene == null)
         {
-            _graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
-            _graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            Debug.WriteLine("Could not read JSON sprite file.");
+            return;
         }
-        else
+
+        _player = scene.GetChild("Player").GetChild("player") as PlayerNode;
+        _player.Initialize();
+
+        _tileLayers = new Node();
+        for (int i = 0; i < scene.CountChildren; i++)
         {
-            _graphics.PreferredBackBufferWidth = Window.ClientBounds.Width;
-            _graphics.PreferredBackBufferWidth = Window.ClientBounds.Height;
+            if (scene.GetChild(i) is TileLayerNode tileLayer)
+            {
+                _tileLayers.AddChild(scene.GetChildName(i), tileLayer);
+            }
         }
-        _graphics.ApplyChanges();
-        OnResizeWindow(null, null);
     }
 
     protected void OnResizeWindow(object sender, EventArgs e)
@@ -139,38 +141,5 @@ public class Game1 : Game
         Point size = new(_camera.GameRect.Width * scale, _camera.GameRect.Height * scale);
         Point location = new((Window.ClientBounds.Width - size.X) / 2, (Window.ClientBounds.Height - size.Y) / 2);
         _camera.ViewRect = new Rectangle(location, size);
-    }
-
-    protected void LoadScene(string filePath)
-    {
-        using StreamReader reader = new(filePath);
-        var json = reader.ReadToEnd();
-        var scene = JsonConvert.DeserializeObject<Node>(json);
-        if (scene == null)
-        {
-            Debug.WriteLine("Could not read JSON sprite file.");
-            return;
-        }
-
-        //_player = scene.GetChild("player") as PlayerNode;
-        _enemies = scene.GetChild("enemies");
-    }
-
-    protected void LoadSceneFromTiled(string filePath)
-    {
-        using StreamReader reader = new(filePath);
-        var json = reader.ReadToEnd();
-        var jObject = JObject.Parse(json);
-        var scene = _tiledParser.ParseMap(_contentManager, jObject);
-        if (scene == null)
-        {
-            Debug.WriteLine("Could not read JSON sprite file.");
-            return;
-        }
-
-        _player = scene.GetChild("Player").GetChild("player") as PlayerNode;
-        _enemies = new Node();
-
-        _player.Initialize();
     }
 }
