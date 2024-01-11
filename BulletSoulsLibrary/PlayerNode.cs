@@ -2,6 +2,7 @@
 using Engine.Managers;
 using Engine.Nodes;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using System.Diagnostics;
 using MathHelper = Engine.MathHelper;
 
@@ -26,6 +27,8 @@ public class PlayerNode : Node2D
     private PlayerStates _state;
     private SpriteNode? _sprite;
     private readonly SpriteNode?[] _dashTrail;
+
+    public Vector2 MoveVector { get; private set; }
 
     public float Speed { get; set; }
     public float SprintBaseSpeed { get; set; }
@@ -61,27 +64,27 @@ public class PlayerNode : Node2D
         var facingVector = Get2DInputVector(inputState, InputSignal.HorizontalFacing, InputSignal.VerticalFacing, true);
 
         UpdateState(moveInputVector, pressingDash, holdingDash);
-        var moveVector = moveInputVector * SpeedThisFrame();
+        MoveVector = moveInputVector * SpeedThisFrame();
         if (_state == PlayerStates.Slide)
         {
-            moveVector += _slideVector;
+            MoveVector += _slideVector;
         }
-        Move(moveVector);
+        Move(MoveVector);
 
         //Update Facing
         if (_state == PlayerStates.Sprint
             || facingVector.LengthSquared() == 0
             && inputState[InputSignal.Strafe] == 0)
         {
-            facingVector = moveVector;
+            facingVector = MoveVector;
         }
         if (facingVector.LengthSquared() > 0)
         {
             Facing = Vector2.Normalize(facingVector);
         }
 
-        UpdateAnimations(moveVector.Length());
-        UpdateTrail(moveVector);
+        UpdateAnimations(MoveVector.Length());
+        UpdateTrail(MoveVector);
 
         _prevState = inputState;
         base.Update(this, frameNumber, inputState);
@@ -303,5 +306,29 @@ public class PlayerNode : Node2D
             _sprite = null;
         }
         base.RemoveChild(name);
+    }
+
+    public static void DefaultControls(InputManager inputManager)
+    {
+        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
+        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
+        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.HorizontalFacing, new KeyInput(Keys.Left, Keys.Right));
+        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.VerticalFacing, new KeyInput(Keys.Up, Keys.Down));
+        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.Strafe, new KeyInput(Keys.LeftShift));
+        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.Dash, new KeyInput(Keys.Space));
+
+        inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
+        inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
+        inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.HorizontalFacing, new MouseAxisInput(MouseAxes.MouseX));
+        inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.VerticalFacing, new MouseAxisInput(MouseAxes.MouseY));
+        inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.Dash, new KeyInput(Keys.Space));
+
+        inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalMovement, new GamePadAxisInput(GamePadAxes.LeftStickX));
+        inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalMovement, new GamePadAxisInput(GamePadAxes.LeftStickY, true));
+        inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalFacing, new GamePadAxisInput(GamePadAxes.RightStickX));
+        inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalFacing, new GamePadAxisInput(GamePadAxes.RightStickY, true));
+        inputManager.SetBinding(InputMode.XBoxController, InputSignal.Strafe, new GamePadButtonInput(Buttons.LeftTrigger));
+        inputManager.SetBinding(InputMode.XBoxController, InputSignal.Dash, new GamePadButtonInput(Buttons.B));
+
     }
 }

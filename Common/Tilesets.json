@@ -1,0 +1,12 @@
+{
+  "wallTiles": {
+    "TextureName": "wallTiles",
+    "TileWidth": 8,
+    "TileHeight": 8
+  },
+  "groundTiles": {
+    "TextureName": "groundTiles",
+    "TileWidth": 8,
+    "TileHeight": 8
+  }
+}
