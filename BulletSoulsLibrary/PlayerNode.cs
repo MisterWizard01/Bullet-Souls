@@ -28,6 +28,8 @@ public class PlayerNode : Node2D
     private SpriteNode? _sprite;
     private readonly SpriteNode?[] _dashTrail;
 
+    public Vector2 MoveVector { get; private set; }
+
     public float Speed { get; set; }
     public float SprintBaseSpeed { get; set; }
     public float SprintAcceleration { get; set; }
@@ -62,27 +64,27 @@ public class PlayerNode : Node2D
         var facingVector = Get2DInputVector(inputState, InputSignal.HorizontalFacing, InputSignal.VerticalFacing, true);
 
         UpdateState(moveInputVector, pressingDash, holdingDash);
-        var moveVector = moveInputVector * SpeedThisFrame();
+        MoveVector = moveInputVector * SpeedThisFrame();
         if (_state == PlayerStates.Slide)
         {
-            moveVector += _slideVector;
+            MoveVector += _slideVector;
         }
-        Move(moveVector);
+        Move(MoveVector);
 
         //Update Facing
         if (_state == PlayerStates.Sprint
             || facingVector.LengthSquared() == 0
             && inputState[InputSignal.Strafe] == 0)
         {
-            facingVector = moveVector;
+            facingVector = MoveVector;
         }
         if (facingVector.LengthSquared() > 0)
         {
             Facing = Vector2.Normalize(facingVector);
         }
 
-        UpdateAnimations(moveVector.Length());
-        UpdateTrail(moveVector);
+        UpdateAnimations(MoveVector.Length());
+        UpdateTrail(MoveVector);
 
         _prevState = inputState;
         base.Update(this, frameNumber, inputState);

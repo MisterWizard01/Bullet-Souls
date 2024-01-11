@@ -72,10 +72,10 @@
                 2
             ],
             "scale": 2,
-            "selectedLayer": 0,
+            "selectedLayer": 5,
             "viewCenter": {
-                "x": 112.5,
-                "y": 58.5
+                "x": 90.5,
+                "y": 108.5
             }
         },
         "test.json#Ground": {
@@ -101,7 +101,7 @@
         "test.json"
     ],
     "project": "Bullet Souls.tiled-project",
-    "property.type": "string",
+    "property.type": "Collider",
     "recentFiles": [
         "test.json",
         "GroundTiles.tsx",

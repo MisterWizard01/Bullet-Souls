@@ -25,7 +25,7 @@ public class Game1 : Game
     private Effect _betterBlend;
     private Camera _camera;
     private PlayerNode _player;
-    private Node _tileLayers;
+    private Node _walls, _tileLayers;
 
     private KeyboardState _prevKeyboardState;
     private int frameNumber;
@@ -81,6 +81,10 @@ public class Game1 : Game
         //update objects
         _player.Update(null, frameNumber, inputState);
 
+        //collisions player x walls
+        var wallCollisions = CollisionManager.GetCollisions(_player, _walls, _player.MoveVector, Vector2.Zero);
+        Debug.WriteLine(wallCollisions.Count + " collisions");
+
         //ready next frame
         _prevKeyboardState = keyboardState;
         frameNumber++;
@@ -122,6 +126,9 @@ public class Game1 : Game
 
         _player = scene.GetChild("Player").GetChild("player") as PlayerNode;
         _player.Initialize();
+
+        _walls = scene.GetChild("Walls");
+        _walls.Initialize();
 
         _tileLayers = new Node();
         for (int i = 0; i < scene.CountChildren; i++)
