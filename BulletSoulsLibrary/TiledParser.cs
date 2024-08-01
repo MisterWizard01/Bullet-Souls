@@ -39,6 +39,10 @@ public class CustomTiledParser : TiledParser
                 if (spriteProperty is SpriteNode spriteNode)
                     objectNode.AddChild("sprite", spriteNode);
 
+                properties.TryGetValue("collider", out object? colliderProperty);
+                if (colliderProperty is ColliderNode colliderNode)
+                    objectNode.AddChild("collider", colliderNode);
+
                 for (int i = 0; i < 4; i++)
                 {
                     properties.TryGetValue("dashTrail" + i, out object? dashTrailProperty);

@@ -166,7 +166,7 @@
                  "id":8,
                  "name":"",
                  "rotation":0,
-                 "type":"",
+                 "type":"Collider",
                  "visible":true,
                  "width":32,
                  "x":32,
@@ -177,7 +177,7 @@
                  "id":9,
                  "name":"",
                  "rotation":0,
-                 "type":"",
+                 "type":"Collider",
                  "visible":true,
                  "width":32,
                  "x":64,
@@ -188,7 +188,7 @@
                  "id":12,
                  "name":"",
                  "rotation":0,
-                 "type":"",
+                 "type":"Collider",
                  "visible":true,
                  "width":64,
                  "x":96,
@@ -199,7 +199,7 @@
                  "id":14,
                  "name":"",
                  "rotation":0,
-                 "type":"",
+                 "type":"Collider",
                  "visible":true,
                  "width":56,
                  "x":136,
@@ -210,29 +210,29 @@
                  "id":13,
                  "name":"",
                  "rotation":0,
-                 "type":"",
+                 "type":"Collider",
                  "visible":true,
                  "width":32,
                  "x":96,
                  "y":88
                 }, 
                 {
-                 "height":55.8181818181818,
+                 "height":56,
                  "id":10,
                  "name":"",
                  "rotation":0,
-                 "type":"",
+                 "type":"Collider",
                  "visible":true,
                  "width":8,
-                 "x":55.8181818181818,
-                 "y":48.1818181818182
+                 "x":56,
+                 "y":48
                 }, 
                 {
                  "height":40,
                  "id":11,
                  "name":"",
                  "rotation":0,
-                 "type":"",
+                 "type":"Collider",
                  "visible":true,
                  "width":16,
                  "x":40,
@@ -294,8 +294,8 @@
                             {
                              "Height":15,
                              "Width":5,
-                             "XOffset":6,
-                             "YOffset":1
+                             "XOffset":-2,
+                             "YOffset":-7
                             }
                         }, 
                         {

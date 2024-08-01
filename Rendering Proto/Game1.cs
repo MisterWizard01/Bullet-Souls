@@ -73,7 +73,7 @@ public class Game1 : Game
         _blockySans = FontBuilder.BuildFont(_blockySansTexture, new Point(8, 12), new Point(1, 1), ' ', new Point(6, 10));
 
         string commonFolder = FileManager.GetCommonFolder();
-        LoadSprites(Path.Combine(commonFolder, "Data.json"));
+        LoadSprites(commonFolder, "Sprites.json");
         LoadScene(Path.Combine(commonFolder, "map.json"));
     }
 
@@ -163,8 +163,9 @@ public class Game1 : Game
         _camera.ViewRect = new Rectangle(location, size);
     }
 
-    protected void LoadSprites(string filePath)
+    protected void LoadSprites(string commonFolder, string fileName)
     {
+        var filePath = Path.Combine(commonFolder, fileName);
         using StreamReader reader = new(filePath);
         var json = reader.ReadToEnd();
         var sprites = JsonConvert.DeserializeObject<Dictionary<string, Sprite>>(json);
@@ -174,7 +175,7 @@ public class Game1 : Game
             return;
         }
         _contentManager.Sprites = sprites;
-        _contentManager.LoadTextures(Content, "Textures.json");
+        _contentManager.LoadTextures(Content, commonFolder);
     }
 
     protected void LoadScene(string filePath)

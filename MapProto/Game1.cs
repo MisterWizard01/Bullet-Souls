@@ -107,8 +107,22 @@ public class Game1 : Game
 
         _player.Draw(null, _camera, Vector2.Zero);
 
+        DrawHitbox(_player.GetChild("collider") as ColliderNode, _player.Position, Color.LightBlue);
+        for (int i = 0; i < _walls.CountChildren; i++)
+        {
+            DrawHitbox(_walls.GetChild(i) as ColliderNode, Vector2.Zero, Color.White);
+        }
+
         _spriteBatch.End();
         base.Draw(gameTime);
+    }
+
+    protected void DrawHitbox(ColliderNode collider, Vector2 referencePoint, Color color)
+    {
+        var destination = new Rectangle(
+            (collider.Position + referencePoint - collider.Dimensions / 2).ToPoint(),
+            collider.Dimensions.ToPoint());
+        _camera.Draw(_contentManager.Textures["whitePixel"], destination, color);
     }
 
     protected void LoadSceneFromTiled(string filePath)
