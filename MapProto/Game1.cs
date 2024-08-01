@@ -82,8 +82,30 @@ public class Game1 : Game
         _player.Update(null, frameNumber, inputState);
 
         //collisions player x walls
-        var wallCollisions = CollisionManager.GetCollisions(_player, _walls, _player.MoveVector, Vector2.Zero);
-        Debug.WriteLine(wallCollisions.Count + " collisions");
+        List<Collision> wallCollisions;
+        do
+        {
+            wallCollisions = CollisionManager.GetCollisions(_player, _walls, _player.MoveVector, Vector2.Zero);
+            Debug.WriteLine(wallCollisions.Count + " collisions");
+
+            if (wallCollisions.Count > 0)
+            {
+                //find earliest collision
+                var earliestCollision = wallCollisions[0];
+                for (int i = 1; i < wallCollisions.Count; i++)
+                {
+                    if (wallCollisions[i].Time < earliestCollision.Time)
+                    {
+                        earliestCollision = wallCollisions[i];
+                    }
+                }
+
+                //react to the collision
+                var response = CollisionManager.HandleSolidCollision(earliestCollision, _player.MoveVector, Vector2.Zero, 0, 1);
+                _player.Position += response.Node1Translation;
+            }
+        }
+        while (wallCollisions.Count > 1);
 
         //ready next frame
         _prevKeyboardState = keyboardState;
