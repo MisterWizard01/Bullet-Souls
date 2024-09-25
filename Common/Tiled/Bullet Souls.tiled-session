@@ -62,9 +62,11 @@
             "scaleInEditor": 8
         },
         "groundTiles.tsx": {
+            "dynamicWrapping": false,
             "scaleInDock": 1
         },
         "playerTiles.tsx": {
+            "dynamicWrapping": true,
             "scaleInDock": 1
         },
         "test.json": {
@@ -74,8 +76,8 @@
             "scale": 2,
             "selectedLayer": 5,
             "viewCenter": {
-                "x": 96,
-                "y": 34
+                "x": 147,
+                "y": 79
             }
         },
         "test.json#Ground": {
@@ -90,13 +92,26 @@
                 "y": 320.92046956386537
             }
         },
+        "test2.tmj": {
+            "scale": 0.5,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 506,
+                "y": 124
+            }
+        },
         "wallTiles.tsx": {
             "scaleInDock": 1
         }
     },
     "last.externalTilesetPath": "C:/Users/gcagl/source/repos/Bullet Souls/Common/Tiled",
     "last.imagePath": "C:/Users/gcagl/OneDrive/Pictures/Bullet Souls",
+    "map.height": 60,
     "map.lastUsedFormat": "json",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 90,
+    "mapScene.enableWorlds": true,
     "openFiles": [
         "test.json"
     ],

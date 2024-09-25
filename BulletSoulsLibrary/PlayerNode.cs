@@ -20,6 +20,7 @@ public class PlayerNode : Node2D
         Parry
     }
 
+    #region private state variables
     private Vector2 _prevMove;
     private InputState _prevState;
     private int _slowFrames, _parryFrames, _sprintFrames;
@@ -27,17 +28,23 @@ public class PlayerNode : Node2D
     private PlayerStates _state;
     private SpriteNode? _sprite;
     private readonly SpriteNode?[] _dashTrail;
+    #endregion
 
-    public Vector2 MoveVector { get; private set; }
+    #region public state variables
+    public Vector2 Facing { get; set; }
+    public float WeaponCharge { get; set; }
+    public bool Shoot { get; set; }
+    #endregion
 
+    #region player stats
     public float Speed { get; set; }
     public float SprintBaseSpeed { get; set; }
     public float SprintAcceleration { get; set; }
-    public Vector2 Facing { get; set; }
-    public float WeaponCharge { get; set; }
+    public float WeaponChargeRate { get; set; }
     public float DashDistance { get; set; }
     public int DashCooldown { get; set; }
     public int ParryWindow { get; set; }
+    #endregion
 
     public PlayerNode() : base()
     {
@@ -62,29 +69,43 @@ public class PlayerNode : Node2D
         var holdingDash = _prevState[InputSignal.Dash] > 0;
         var moveInputVector = Get2DInputVector(inputState, InputSignal.HorizontalMovement, InputSignal.VerticalMovement, true);
         var facingVector = Get2DInputVector(inputState, InputSignal.HorizontalFacing, InputSignal.VerticalFacing, true);
+        var pressingFire = inputState[InputSignal.Fire] > 0;
+        var holdingFire = _prevState[InputSignal.Fire] > 0;
 
-        UpdateState(moveInputVector, pressingDash, holdingDash);
-        MoveVector = moveInputVector * SpeedThisFrame();
+        UpdateState(moveInputVector, pressingDash, holdingDash, pressingFire);
+        Velocity = moveInputVector * SpeedThisFrame();
         if (_state == PlayerStates.Slide)
         {
-            MoveVector += _slideVector;
+            Velocity += _slideVector;
         }
-        Move(MoveVector);
+        PreventCobblestoning(Velocity);
 
         //Update Facing
         if (_state == PlayerStates.Sprint
             || facingVector.LengthSquared() == 0
             && inputState[InputSignal.Strafe] == 0)
         {
-            facingVector = MoveVector;
+            facingVector = Velocity;
         }
         if (facingVector.LengthSquared() > 0)
         {
             Facing = Vector2.Normalize(facingVector);
         }
 
-        UpdateAnimations(MoveVector.Length());
-        UpdateTrail(MoveVector);
+        //Update Firing
+        if (pressingFire)
+        {
+            WeaponCharge += WeaponChargeRate;
+        }
+        else
+        {
+            if (WeaponCharge >= 1)
+                Shoot = true;
+            WeaponCharge = 0;
+        }
+
+        UpdateAnimations(Velocity.Length());
+        UpdateTrail(Velocity);
 
         _prevState = inputState;
         base.Update(this, frameNumber, inputState);
@@ -98,7 +119,7 @@ public class PlayerNode : Node2D
         //TODO: draw hud
     }
 
-    public void UpdateState(Vector2 moveInputVector, bool pressingDash, bool holdingDash)
+    public void UpdateState(Vector2 moveInputVector, bool pressingDash, bool holdingDash, bool pressingFire)
     {
         switch (_state)
         {
@@ -129,7 +150,7 @@ public class PlayerNode : Node2D
 
             case PlayerStates.Sprint:
                 _sprintFrames++;
-                if (pressingDash && holdingDash && moveInputVector.LengthSquared() > 0)
+                if (!pressingFire && pressingDash && holdingDash && moveInputVector.LengthSquared() > 0)
                     break;
                 _sprintFrames = 0;
                 _state = PlayerStates.Slide;
@@ -183,7 +204,7 @@ public class PlayerNode : Node2D
         };
     }
 
-    private void Move(Vector2 moveVector)
+    private void PreventCobblestoning(Vector2 moveVector)
     {
         var angleDiff = MathHelper.AngleDifference(MathHelper.VectorToAngle(moveVector), MathHelper.VectorToAngle(_prevMove));
         if (_prevMove.LengthSquared() > 0
@@ -192,8 +213,6 @@ public class PlayerNode : Node2D
             X = (float)Math.Floor(X);
             Y = (float)Math.Floor(Y);
         }
-        Position += moveVector;
-
         _slideVector /= 1.1f;
         _prevMove = moveVector;
     }
@@ -312,16 +331,18 @@ public class PlayerNode : Node2D
     {
         inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
         inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
-        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.HorizontalFacing, new KeyInput(Keys.Left, Keys.Right));
-        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.VerticalFacing, new KeyInput(Keys.Up, Keys.Down));
+        //inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.HorizontalFacing, new KeyInput(Keys.Left, Keys.Right));
+        //inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.VerticalFacing, new KeyInput(Keys.Up, Keys.Down));
         inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.Strafe, new KeyInput(Keys.LeftShift));
         inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.Dash, new KeyInput(Keys.Space));
+        inputManager.SetBinding(InputMode.KeyboardOnly, InputSignal.Fire, new KeyInput(Keys.Left));
 
         inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.HorizontalMovement, new KeyInput(Keys.A, Keys.D));
         inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.VerticalMovement, new KeyInput(Keys.W, Keys.S));
         inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.HorizontalFacing, new MouseAxisInput(MouseAxes.MouseX));
         inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.VerticalFacing, new MouseAxisInput(MouseAxes.MouseY));
         inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.Dash, new KeyInput(Keys.Space));
+        inputManager.SetBinding(InputMode.MouseAndKeyboard, InputSignal.Fire, new MouseButtonInput(MouseButtons.LeftButton));
 
         inputManager.SetBinding(InputMode.XBoxController, InputSignal.HorizontalMovement, new GamePadAxisInput(GamePadAxes.LeftStickX));
         inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalMovement, new GamePadAxisInput(GamePadAxes.LeftStickY, true));
@@ -329,6 +350,7 @@ public class PlayerNode : Node2D
         inputManager.SetBinding(InputMode.XBoxController, InputSignal.VerticalFacing, new GamePadAxisInput(GamePadAxes.RightStickY, true));
         inputManager.SetBinding(InputMode.XBoxController, InputSignal.Strafe, new GamePadButtonInput(Buttons.LeftTrigger));
         inputManager.SetBinding(InputMode.XBoxController, InputSignal.Dash, new GamePadButtonInput(Buttons.B));
+        inputManager.SetBinding(InputMode.XBoxController, InputSignal.Fire, new GamePadAxisInput(GamePadAxes.RightTrigger));
 
     }
 }

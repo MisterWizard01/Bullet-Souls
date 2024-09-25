@@ -24,6 +24,7 @@ public class CustomTiledParser : TiledParser
                 properties.TryGetValue("SprintAcceleration", out object? sprintAcceleration);
                 properties.TryGetValue("SprintBaseSpeed", out object? sprintBaseSpeed);
                 properties.TryGetValue("ParryWindow", out object? parryWindow);
+                properties.TryGetValue("WeaponChargeRate", out object? weaponChargeRate);
                 objectNode = new PlayerNode()
                 {
                     Position = new Vector2(obj.Value<float>("x"), obj.Value<float>("y")),
@@ -33,6 +34,7 @@ public class CustomTiledParser : TiledParser
                     SprintAcceleration = (float)(sprintAcceleration ?? 0),
                     SprintBaseSpeed = (float)(sprintBaseSpeed ?? 0),
                     ParryWindow = (int)(parryWindow ?? 0),
+                    WeaponChargeRate = (float)(weaponChargeRate ?? 0),
                 };
 
                 properties.TryGetValue("sprite", out object? spriteProperty);

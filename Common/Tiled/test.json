@@ -255,107 +255,107 @@
                  "height":16,
                  "id":1,
                  "name":"player",
-                 "properties":[
-                        {
-                         "name":"DashCooldown",
-                         "type":"int",
-                         "value":20
-                        }, 
-                        {
-                         "name":"DashDistance",
-                         "type":"float",
-                         "value":22
-                        }, 
-                        {
-                         "name":"ParryWindow",
-                         "type":"int",
-                         "value":10
-                        }, 
-                        {
-                         "name":"Speed",
-                         "type":"float",
-                         "value":0.8
-                        }, 
-                        {
-                         "name":"SprintAcceleration",
-                         "type":"float",
-                         "value":0.002
-                        }, 
-                        {
-                         "name":"SprintBaseSpeed",
-                         "type":"float",
-                         "value":1.5
-                        }, 
-                        {
-                         "name":"collider",
-                         "propertytype":"Collider",
-                         "type":"class",
-                         "value":
-                            {
-                             "Height":15,
-                             "Width":5,
-                             "XOffset":-2,
-                             "YOffset":-7
-                            }
-                        }, 
-                        {
-                         "name":"dashTrail0",
-                         "propertytype":"Sprite",
-                         "type":"class",
-                         "value":
-                            {
-                             "AnimationName":"dash down",
-                             "BlendColor":"#ffffffff",
-                             "SpriteName":"player",
-                             "Visible":false
-                            }
-                        }, 
-                        {
-                         "name":"dashTrail1",
-                         "propertytype":"Sprite",
-                         "type":"class",
-                         "value":
-                            {
-                             "AnimationName":"dash down",
-                             "BlendColor":"#ff2ce8f5",
-                             "SpriteName":"player",
-                             "Visible":false
-                            }
-                        }, 
-                        {
-                         "name":"dashTrail2",
-                         "propertytype":"Sprite",
-                         "type":"class",
-                         "value":
-                            {
-                             "AnimationName":"dash down",
-                             "BlendColor":"#ff0095f3",
-                             "SpriteName":"player",
-                             "Visible":false
-                            }
-                        }, 
-                        {
-                         "name":"dashTrail3",
-                         "propertytype":"Sprite",
-                         "type":"class",
-                         "value":
-                            {
-                             "AnimationName":"dash down",
-                             "BlendColor":"#ff124e89",
-                             "SpriteName":"player",
-                             "Visible":false
-                            }
-                        }, 
-                        {
-                         "name":"sprite",
-                         "propertytype":"Sprite",
-                         "type":"class",
-                         "value":
-                            {
-                             "AnimationName":"stand down",
-                             "SpriteName":"player"
-                            }
-                        }],
+                  "properties": [
+                    {
+                      "name": "DashCooldown",
+                      "type": "int",
+                      "value": 20
+                    },
+                    {
+                      "name": "DashDistance",
+                      "type": "float",
+                      "value": 22
+                    },
+                    {
+                      "name": "ParryWindow",
+                      "type": "int",
+                      "value": 10
+                    },
+                    {
+                      "name": "Speed",
+                      "type": "float",
+                      "value": 0.8
+                    },
+                    {
+                      "name": "SprintAcceleration",
+                      "type": "float",
+                      "value": 0.002
+                    },
+                    {
+                      "name": "SprintBaseSpeed",
+                      "type": "float",
+                      "value": 1.5
+                    },
+                    {
+                      "name": "WeaponChargeRate",
+                      "type": "float",
+                      "value": 0.1
+                    },
+                    {
+                      "name": "collider",
+                      "propertytype": "Collider",
+                      "type": "class",
+                      "value": {
+                        "Height": 15,
+                        "Width": 5,
+                        "XOffset": -2,
+                        "YOffset": -7
+                      }
+                    },
+                    {
+                      "name": "dashTrail0",
+                      "propertytype": "Sprite",
+                      "type": "class",
+                      "value": {
+                        "AnimationName": "dash down",
+                        "BlendColor": "#ffffffff",
+                        "SpriteName": "player",
+                        "Visible": false
+                      }
+                    },
+                    {
+                      "name": "dashTrail1",
+                      "propertytype": "Sprite",
+                      "type": "class",
+                      "value": {
+                        "AnimationName": "dash down",
+                        "BlendColor": "#ff2ce8f5",
+                        "SpriteName": "player",
+                        "Visible": false
+                      }
+                    },
+                    {
+                      "name": "dashTrail2",
+                      "propertytype": "Sprite",
+                      "type": "class",
+                      "value": {
+                        "AnimationName": "dash down",
+                        "BlendColor": "#ff0095f3",
+                        "SpriteName": "player",
+                        "Visible": false
+                      }
+                    },
+                    {
+                      "name": "dashTrail3",
+                      "propertytype": "Sprite",
+                      "type": "class",
+                      "value": {
+                        "AnimationName": "dash down",
+                        "BlendColor": "#ff124e89",
+                        "SpriteName": "player",
+                        "Visible": false
+                      }
+                    },
+                    {
+                      "name": "sprite",
+                      "propertytype": "Sprite",
+                      "type": "class",
+                      "value": {
+                        "AnimationName": "stand down",
+                        "SpriteName": "player"
+                      }
+                    }
+                  ],
                  "rotation":0,
                  "type":"Player",
                  "visible":true,
