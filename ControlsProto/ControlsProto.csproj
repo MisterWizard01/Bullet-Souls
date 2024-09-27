@@ -28,7 +28,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Engine">
-      <HintPath>..\..\JuiceEngine\Engine\bin\Debug\net6.0\Engine.dll</HintPath>
+      <HintPath>..\..\Juice Engine\Engine\bin\Debug\net6.0\Engine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">

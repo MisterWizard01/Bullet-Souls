@@ -28,7 +28,7 @@ public class Game1 : Game
     private PlayerNode _player;
     private Node _tileLayers, _walls;
     private ContainerNode _shots, _enemies;
-    private int _nextEnemy;
+    private int _nextWave, _wave;
 
     private KeyboardState _prevKeyboardState;
     private int _frameNumber;
@@ -36,6 +36,8 @@ public class Game1 : Game
     public Game1()
     {
         _graphics = new(this);
+        Window.AllowUserResizing = true;
+        Window.ClientSizeChanged += OnResizeWindow;
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
         _inputManager = new(InputMode.KeyboardOnly);
@@ -50,7 +52,8 @@ public class Game1 : Game
         _camera = new(_spriteBatch, new Rectangle(0, 0, 192, 144));
         _shots = new("shot");
         _enemies = new("enemies");
-        _nextEnemy = 60;
+        _nextWave = 60;
+        _wave = 1;
         _rasterizerState = new() { ScissorTestEnable = true };
         OnResizeWindow(null, null);
         _frameNumber = 0;
@@ -85,7 +88,7 @@ public class Game1 : Game
         _inputManager.Update(_camera.GameToView(_player.Position));
         var inputState = _inputManager.InputState;
 
-        //destroy objects
+        #region destroy too-old shots
         for (int i = _shots.CountChildren - 1; i >= 0; i--)
         {
             var shot = _shots.GetChild(i) as ShotNode;
@@ -94,65 +97,77 @@ public class Game1 : Game
                 _shots.RemoveChild(i);
             }
         }
-
-        //update objects
+        #endregion
+        #region destroy dead enemies
+        if (keyboardState.IsKeyDown(Keys.Q))
+        {
+            _enemies.RemoveChild(0);
+            if (_enemies.CountChildren == 0)
+                _nextWave = _frameNumber + 120;
+        }
+        #endregion
+        #region update player and shots
         _player.Update(null, _frameNumber, inputState);
         _shots.Update(null, _frameNumber, inputState);
-
+        #endregion
+        #region update enemies' movement and collision
         for (int i = 0; i < _enemies.CountChildren; i++)
         {
             var enemy = _enemies.GetChild(i) as EnemyNode;
-            enemy.Target = _player.Position;
-        }
-        _enemies.Update(null, _frameNumber, inputState);
+            var angle = i * Math.Tau / _enemies.CountChildren;
+            enemy.Target = _player.Position + new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * 20;
+            enemy.Update(_enemies, _frameNumber, inputState);
 
-        //create objects
+            List<Collision> collisions;
+            do
+            { 
+                collisions = CollisionManager.GetCollisions(enemy, _enemies);
+                collisions.AddRange(CollisionManager.GetCollisions(enemy, _walls));
+                if (collisions.Count == 0)
+                    break;
+                CollisionManager.SortCollisions(collisions);
+                var response = CollisionManager.HandleSolidCollision(collisions[0], 0, 1);
+                enemy.Position += response.Node1Translation;
+            } while (collisions.Count > 0);
+        }
+        #endregion
+        #region player shooting
         if (_player.Shoot)
         {
             var shot = new ShotNode(_player.Position, _player.Facing * 3, _contentManager.Sprites["player shot"]);
             _shots.Add(shot);
             _player.Shoot = false;
         }
-
-        if (_frameNumber >= _nextEnemy)
+        #endregion
+        #region spawn enemies
+        if (_enemies.CountChildren == 0 && _frameNumber >= _nextWave)
         {
-            var angle = _random.NextDouble() * Math.Tau;
-            var offset = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * Math.Max(_camera.Size.X, _camera.Size.Y);
-            var enemyPosition = new Vector2((float)Math.Floor(_player.X + offset.X), (float)Math.Floor(_player.Y + offset.Y));
-            var enemy = new EnemyNode(enemyPosition, _contentManager.Sprites["enemy"]);
-            _enemies.Add(enemy);
-            _nextEnemy += 300;
+            for (int i = 0; i < _wave; i++)
+            {
+                var angle = i * Math.Tau / _wave;
+                var offset = new Vector2((float)Math.Cos(angle), (float)Math.Sin(angle)) * Math.Max(_camera.Size.X, _camera.Size.Y);
+                var enemyPosition = new Vector2((float)Math.Floor(offset.X + _camera.Size.X / 2), (float)Math.Floor(offset.Y) + _camera.Size.Y / 2);
+                var enemy = new EnemyNode(enemyPosition, _contentManager.Sprites["enemy"]);
+                _enemies.Add(enemy);
+            }
+            _wave++;
         }
-
-        //resuable list
-        List<Collision> collisions;
-
-        //collisions player x walls
+        #endregion
+        #region collisions player x walls
+        List<Collision> playerWallcollisions = new List<Collision>();
         do
         {
-            collisions = CollisionManager.GetCollisions(_player, _walls, _player.Velocity, Vector2.Zero);
-            //Debug.WriteLine(wallCollisions.Count + " collisions");
-
-            if (collisions.Count > 0)
-            {
-                //find earliest collision
-                var earliestCollision = collisions[0];
-                for (int i = 1; i < collisions.Count; i++)
-                {
-                    if (collisions[i].Time < earliestCollision.Time)
-                    {
-                        earliestCollision = collisions[i];
-                    }
-                }
-
-                //react to the collision
-                var response = CollisionManager.HandleSolidCollision(earliestCollision, _player.Velocity, Vector2.Zero, 0, 1);
-                _player.Position += response.Node1Translation;
-            }
+            playerWallcollisions = CollisionManager.GetCollisions(_player, _walls);
+            if (playerWallcollisions.Count == 0)
+                break;
+            CollisionManager.SortCollisions(playerWallcollisions);
+            var response = CollisionManager.HandleSolidCollision(playerWallcollisions[0], 0, 1);
+            _player.Position += response.Node1Translation;
+            if (_player.State == PlayerNode.PlayerStates.Sprint)
+                _player.StopSprinting();
         }
-        while (collisions.Count > 1);
-
-        EnemyWallCollisions();
+        while (playerWallcollisions.Count > 0);
+        #endregion
 
         //move the camera
         _camera.Position = (BetterPoint)(_player.Position - _camera.Size.ToVector2() / 2);
@@ -240,23 +255,43 @@ public class Game1 : Game
         Point location = new((Window.ClientBounds.Width - size.X) / 2, (Window.ClientBounds.Height - size.Y) / 2);
         _camera.ViewRect = new Rectangle(location, size);
     }
-
-    protected void EnemyEnemyCollisions()
+    /*
+    protected void EnemyEnemyCollisions(EnemyNode enemy1)
     {
         var collisions = new List<Collision>();
-        for (int i = 0; i < _enemies.CountChildren - 1; i++)
+        var collidedWith = new List<EnemyNode>();
+        for (int j = 0; j < _enemies.CountChildren; j++)
         {
-            var enemy1 = _enemies.GetChild(i);
-            for (int j = i + 1; j < _enemies.CountChildren; j++)
+            var enemy2 = _enemies.GetChild(j) as EnemyNode;
+            var collision = CollisionManager.CheckCollision(enemy1.Collider, enemy2.Collider, enemy1.Position, enemy2.Position, enemy1.PreviousPosition, enemy2.PreviousPosition);
+            if (collision is not null)
             {
-                var enemy2 = _enemies.GetChild(j);
-                collisions.AddRange(CollisionManager.GetCollisions(enemy1, enemy2, Vector2.Zero, Vector2.Zero));
+                collisions.Add(collision.Value);
+                collidedWith.Add(enemy2);
             }
         }
 
-        if (collisions.Count > 0)
+        //sort the collisions
+        for (int i = 0; i < collisions.Count - 1; i++)
         {
+            for (int j = 0; j < collisions.Count; j++)
+            {
+                if (collisions[i].Time > collisions[j].Time)
+                {
+                    (collisions[i], collisions[j]) = (collisions[j], collisions[i]);
+                    (collidedWith[i], collidedWith[j]) = (collidedWith[j], collidedWith[i]);
+                }
+            }
+        }
 
+        for (int i = 0; i < collisions.Count; i++)
+        {
+            //get the colliding enemies and handle the collision
+            var earliestCollision = collisions[i];
+            var enemy2 = collidedWith[i];
+            var collisionResponse = CollisionManager.HandleSolidCollision(earliestCollision, 1, 1);
+            enemy1.Position += collisionResponse.Node1Translation;
+            enemy2.Position += collisionResponse.Node2Translation;
         }
     }
 
@@ -294,6 +329,13 @@ public class Game1 : Game
             //get the colliding enemy and handle the collision
             var earliestCollision = collisions[earliestIndex][0];
             var enemy = _enemies.GetChild(earliestIndex) as EnemyNode;
+            //if the enemy isn't moving, just ignore it
+            if (enemy.Velocity.LengthSquared() == 0)
+            {
+                totalCollisions -= collisions[earliestIndex].Count;
+                collisions.RemoveAt(earliestIndex);
+                continue;
+            }
             var collisionResponse = CollisionManager.HandleSolidCollision(earliestCollision, enemy.Velocity, Vector2.Zero, 0, 1);
             enemy.Position += collisionResponse.Node1Translation;
 
@@ -303,4 +345,5 @@ public class Game1 : Game
             totalCollisions += collisions[earliestIndex].Count;
         }
     }
+    */
 }

@@ -7,7 +7,7 @@ namespace BulletSoulsLibrary;
 public class EnemyNode : Node2D
 {
     private SpriteNode? _sprite;
-    private ColliderNode? _collider;
+    public ColliderNode? Collider { get; private set; }
 
     public Vector2 Target { get; set; }
     public float MoveSpeed { get; set; }
@@ -22,20 +22,21 @@ public class EnemyNode : Node2D
     {
         _sprite = new SpriteNode(sprite, "stand down");
         AddChild("sprite", _sprite);
-        _collider = new ColliderNode(0, 0, 16, 20);
-        AddChild("collider", _collider);
+        Collider = new ColliderNode(0, 0, 16, 20);
+        AddChild("collider", Collider);
 
         MoveSpeed = 0.5f;
     }
 
     public override void Update(Node parent, int frameNumber, InputState inputState)
     {
-        Velocity = Target - Position;
-        if (Math.Abs(Velocity.X) < Math.Abs(Velocity.Y))
-            Velocity = new(0, MoveSpeed * Math.Sign(Velocity.Y));
-        else
-            Velocity = new(MoveSpeed * Math.Sign(Velocity.X), 0);
-        
         base.Update(parent, frameNumber, inputState);
+        var velocity = Target - Position;
+        if (Math.Abs(velocity.X) < Math.Abs(velocity.Y))
+            velocity = new(0, MoveSpeed * Math.Sign(velocity.Y));
+        else
+            velocity = new(MoveSpeed * Math.Sign(velocity.X), 0);
+        Position += velocity;
+
     }
 }

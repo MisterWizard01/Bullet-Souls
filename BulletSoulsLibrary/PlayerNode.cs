@@ -25,13 +25,14 @@ public class PlayerNode : Node2D
     private InputState _prevState;
     private int _slowFrames, _parryFrames, _sprintFrames;
     private Vector2 _slideVector;
-    private PlayerStates _state;
     private SpriteNode? _sprite;
     private readonly SpriteNode?[] _dashTrail;
     #endregion
 
     #region public state variables
+    public PlayerStates State { get; private set; }
     public Vector2 Facing { get; set; }
+    public Vector2 Velocity { get; set; }
     public float WeaponCharge { get; set; }
     public bool Shoot { get; set; }
     #endregion
@@ -65,6 +66,8 @@ public class PlayerNode : Node2D
 
     public override void Update(Node parent, int frameNumber, InputState inputState)
     {
+        base.Update(this, frameNumber, inputState);
+
         var pressingDash = inputState[InputSignal.Dash] > 0;
         var holdingDash = _prevState[InputSignal.Dash] > 0;
         var moveInputVector = Get2DInputVector(inputState, InputSignal.HorizontalMovement, InputSignal.VerticalMovement, true);
@@ -74,14 +77,15 @@ public class PlayerNode : Node2D
 
         UpdateState(moveInputVector, pressingDash, holdingDash, pressingFire);
         Velocity = moveInputVector * SpeedThisFrame();
-        if (_state == PlayerStates.Slide)
+        if (State == PlayerStates.Slide)
         {
             Velocity += _slideVector;
         }
         PreventCobblestoning(Velocity);
+        Position += Velocity;
 
         //Update Facing
-        if (_state == PlayerStates.Sprint
+        if (State == PlayerStates.Sprint
             || facingVector.LengthSquared() == 0
             && inputState[InputSignal.Strafe] == 0)
         {
@@ -108,7 +112,6 @@ public class PlayerNode : Node2D
         UpdateTrail(Velocity);
 
         _prevState = inputState;
-        base.Update(this, frameNumber, inputState);
     }
 
     public override void Draw(Node parent, Camera camera, Vector2 referencePoint)
@@ -121,22 +124,22 @@ public class PlayerNode : Node2D
 
     public void UpdateState(Vector2 moveInputVector, bool pressingDash, bool holdingDash, bool pressingFire)
     {
-        switch (_state)
+        switch (State)
         {
             case PlayerStates.Main:
                 if (!pressingDash || holdingDash)
                     break;
                 if (moveInputVector.LengthSquared() == 0)
                 {
-                    _state = PlayerStates.Parry;
+                    State = PlayerStates.Parry;
                     _parryFrames = ParryWindow;
                     break;
                 }
-                _state = PlayerStates.Dash;
+                State = PlayerStates.Dash;
                 break;
 
             case PlayerStates.Dash:
-                _state = PlayerStates.Recover;
+                State = PlayerStates.Recover;
                 _slowFrames = DashCooldown;
                 break;
 
@@ -145,30 +148,28 @@ public class PlayerNode : Node2D
                 if (_slowFrames > 0)
                     break;
                 LeaveDashTrail(Vector2.Zero); //reset all trail sprites back to 0,0
-                _state = pressingDash && holdingDash ? PlayerStates.Sprint : PlayerStates.Main;
+                State = pressingDash && holdingDash ? PlayerStates.Sprint : PlayerStates.Main;
                 break;
 
             case PlayerStates.Sprint:
                 _sprintFrames++;
                 if (!pressingFire && pressingDash && holdingDash && moveInputVector.LengthSquared() > 0)
                     break;
-                _sprintFrames = 0;
-                _state = PlayerStates.Slide;
-                _slideVector = _prevMove;
+                StopSprinting();
                 break;
 
             case PlayerStates.Slide:
                 if (_slideVector.Length() > 0.01)
                     break;
                 _slideVector = Vector2.Zero;
-                _state = PlayerStates.Main;
+                State = PlayerStates.Main;
                 break;
 
             case PlayerStates.Parry:
                 _parryFrames--;
                 if (_parryFrames > 0)
                     break;
-                _state = PlayerStates.Main;
+                State = PlayerStates.Main;
                 break;
         }
     }
@@ -193,7 +194,7 @@ public class PlayerNode : Node2D
 
     private float SpeedThisFrame()
     {
-        return _state switch
+        return State switch
         {
             PlayerStates.Main => Speed,
             PlayerStates.Dash => DashDistance,
@@ -204,6 +205,9 @@ public class PlayerNode : Node2D
         };
     }
 
+    /// <summary>
+    /// Snaps the player to the grid when changing direction.
+    /// </summary>
     private void PreventCobblestoning(Vector2 moveVector)
     {
         var angleDiff = MathHelper.AngleDifference(MathHelper.VectorToAngle(moveVector), MathHelper.VectorToAngle(_prevMove));
@@ -227,14 +231,14 @@ public class PlayerNode : Node2D
         {
             animationName = "walk ";
         }
-        if (_state == PlayerStates.Dash || _state == PlayerStates.Sprint)
+        if (State == PlayerStates.Dash || State == PlayerStates.Sprint)
         {
             animationName = "dash ";
         }
         _sprite.SetAnimation(animationName + JuicyContentManager.DirectionString8(Facing));
         _sprite.FrameRatio = walkSpeed / 3;
         
-        if (_state != PlayerStates.Parry)
+        if (State != PlayerStates.Parry)
         {
             _sprite.BlendColor = Color.Transparent;
         }
@@ -243,7 +247,7 @@ public class PlayerNode : Node2D
     private void UpdateTrail(Vector2 moveVector)
     {
         var trailCooldown = 0f;
-        switch (_state)
+        switch (State)
         {
             case PlayerStates.Main:
 
@@ -307,6 +311,13 @@ public class PlayerNode : Node2D
         _dashTrail[0]!.Position = -4 * moveVector / _dashTrail.Length;
         _dashTrail[0]!.SetAnimation(_sprite?.AnimationName ?? "");
         JuicyContentManager.YSortChildren(this);
+    }
+
+    public void StopSprinting()
+    {
+        _sprintFrames = 0;
+        State = PlayerStates.Slide;
+        _slideVector = _prevMove;
     }
 
     public override void AddChild(string name, Node child)

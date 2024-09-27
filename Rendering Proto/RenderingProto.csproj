@@ -25,10 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Engine">
-      <HintPath>..\..\JuiceEngine\Engine\bin\Debug\net6.0\Engine.dll</HintPath>
-    </Reference>
-    <Reference Include="SpriteBuilder">
-      <HintPath>..\..\JuiceEngine\SpriteBuilder\bin\Debug\net6.0\SpriteBuilder.dll</HintPath>
+      <HintPath>..\..\Juice Engine\Engine\bin\Debug\net6.0\Engine.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Target Name="RestoreDotnetTools" BeforeTargets="Restore">
