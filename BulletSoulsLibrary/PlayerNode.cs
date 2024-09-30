@@ -320,6 +320,11 @@ public class PlayerNode : Node2D
         _slideVector = _prevMove;
     }
 
+    public void SetSlideVector(Vector2 newSlideVector)
+    {
+        _slideVector = newSlideVector;
+    }
+
     public override void AddChild(string name, Node child)
     {
         if (name == "sprite" && child is SpriteNode s)

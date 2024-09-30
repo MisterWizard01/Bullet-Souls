@@ -13,6 +13,11 @@ using System.IO;
 
 namespace MapProto;
 
+/* Bugs/crashes:
+ * game enters infinite loop when player is squeezed between an enemy and a wall
+ * player gets ejected from wall when dashing into it
+ */
+
 public class Game1 : Game
 {
     private GraphicsDeviceManager _graphics;
@@ -153,18 +158,22 @@ public class Game1 : Game
             _wave++;
         }
         #endregion
-        #region collisions player x walls
-        List<Collision> playerWallcollisions = new List<Collision>();
+        #region solid player collisions
+        List<Collision> playerWallcollisions;
         do
         {
             playerWallcollisions = CollisionManager.GetCollisions(_player, _walls);
+            playerWallcollisions.AddRange(CollisionManager.GetCollisions(_player, _enemies));
             if (playerWallcollisions.Count == 0)
                 break;
             CollisionManager.SortCollisions(playerWallcollisions);
             var response = CollisionManager.HandleSolidCollision(playerWallcollisions[0], 0, 1);
             _player.Position += response.Node1Translation;
+            _player.Position += response.Node1Velocity * (1 - playerWallcollisions[0].Time);
             if (_player.State == PlayerNode.PlayerStates.Sprint)
                 _player.StopSprinting();
+            if (_player.State == PlayerNode.PlayerStates.Slide)
+                _player.SetSlideVector(response.Node1Velocity * 0.8f);
         }
         while (playerWallcollisions.Count > 0);
         #endregion
