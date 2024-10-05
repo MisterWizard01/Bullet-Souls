@@ -159,27 +159,72 @@ public class Game1 : Game
         }
         #endregion
         #region solid player collisions
-        List<Collision> playerWallcollisions;
+        Node2D coupledLeft = null, coupledRight = null, coupledUp = null, coupledDown = null;
+        List<Collision> playerCollisions;
+        List<Node2D> hitNodes = new List<Node2D>();
         do
         {
-            playerWallcollisions = CollisionManager.GetCollisions(_player, _walls);
-            playerWallcollisions.AddRange(CollisionManager.GetCollisions(_player, _enemies));
-            if (playerWallcollisions.Count == 0)
+            //get collisions between the player and walls
+            playerCollisions = CollisionManager.GetCollisions(_player, _walls);
+            for (int i = 0; i < _enemies.CountChildren; i++)
+            {
+                var collision = CollisionManager.CheckCollision(_player)
+                playerCollisions.Add()
+            }
+            if (playerCollisions.Count == 0)
                 break;
-            CollisionManager.SortCollisions(playerWallcollisions);
-            var response = CollisionManager.HandleSolidCollision(playerWallcollisions[0], 0, 1);
-            _player.Position += response.Node1Translation;
-            _player.Position += response.Node1Velocity * (1 - playerWallcollisions[0].Time);
+            //find the earliest collision
+            
+            //calculate the correct response
+            var response = CollisionManager.HandleSolidCollision(playerCollisions[0], 0, 1);
+            //using the response, find out if any other nodes would be affected
+            Node2D coupling = null;
+            if (response.Node1Translation.X > 0)
+            {
+                coupledLeft = hitNodes[0];
+                coupling = coupledRight;
+            }
+            else if (response.Node1Translation.X < 0)
+            {
+                coupledRight = hitNodes[0];
+                coupling = coupledLeft;
+            }
+
+            if (response.Node1Translation.Y > 0)
+            {
+                coupledUp = hitNodes[0];
+                coupling = coupledDown;
+            }
+            else if (response.Node1Translation.Y < 0)
+            {
+                coupledUp = hitNodes[0];
+                coupling = coupledUp;
+            }
+
+            //see if we're coupled to a wall
+            if (coupling is ColliderNode wall)
+            {
+                //recalculate the response because the player can't move
+                playerCollisions[0].Node2.Position -= response.Node1Translation;
+            }
+            else
+            {
+                //move the player and all coupled nodes based on the original collision response
+                _player.Position += response.Node1Translation;
+                _player.Position += response.Node1Velocity * (1 - playerCollisions[0].Time);
+                coupling.Position += response.Node1Translation;
+                coupling.Position += response.Node1Velocity * (1 - playerCollisions[0].Time);
+            }
             if (_player.State == PlayerNode.PlayerStates.Sprint)
                 _player.StopSprinting();
             if (_player.State == PlayerNode.PlayerStates.Slide)
                 _player.SetSlideVector(response.Node1Velocity * 0.8f);
         }
-        while (playerWallcollisions.Count > 0);
+        while (playerCollisions.Count > 0);
         #endregion
 
         //move the camera
-        _camera.Position = (BetterPoint)(_player.Position - _camera.Size.ToVector2() / 2);
+        _camera.Position = (_player.Position - _camera.Size.ToVector2() / 2).ToPoint();
 
         //ready next frame
         _prevKeyboardState = keyboardState;
