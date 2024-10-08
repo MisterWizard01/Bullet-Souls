@@ -9,7 +9,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ControlsProto", "ControlsPr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1A9F9922-2836-4CCE-9772-F85B3A8139E7}"
 	ProjectSection(SolutionItems) = preProject
-		Common\map.json = Common\map.json
 		PlayerParameters.txt = PlayerParameters.txt
 		Common\Sprites.json = Common\Sprites.json
 		Common\Tiled\test.json = Common\Tiled\test.json

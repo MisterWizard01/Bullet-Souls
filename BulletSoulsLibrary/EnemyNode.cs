@@ -4,26 +4,23 @@ using Microsoft.Xna.Framework;
 
 namespace BulletSoulsLibrary;
 
-public class EnemyNode : Node2D
+public class EnemyNode : ColliderNode
 {
     private SpriteNode? _sprite;
-    public ColliderNode? Collider { get; private set; }
-
+    
     public Vector2 Target { get; set; }
     public float MoveSpeed { get; set; }
 
-    public EnemyNode(Vector2 position) : base(position)
+    public EnemyNode(Vector2 position) : base(position, new(16, 16))
     {
         _sprite = GetChild("sprite") as SpriteNode;
         MoveSpeed = 0.5f;
     }
     
-    public EnemyNode(Vector2 position, Sprite sprite) : base(position)
+    public EnemyNode(Vector2 position, Sprite sprite) : base(position, new(16, 16))
     {
         _sprite = new SpriteNode(sprite, "stand down");
         AddChild("sprite", _sprite);
-        Collider = new ColliderNode(0, 0, 16, 20);
-        AddChild("collider", Collider);
 
         MoveSpeed = 0.5f;
     }

@@ -257,6 +257,26 @@
                  "name":"player",
                   "properties": [
                     {
+                      "name": "Height",
+                      "type": "float",
+                      "value": 15
+                    },
+                    {
+                      "name": "Width",
+                      "type": "float",
+                      "value": 5
+                    },
+                    {
+                      "name": "XOffset",
+                      "type": "float",
+                      "value": -2
+                    },
+                    {
+                      "name": "YOffset",
+                      "type": "float",
+                      "value": -7
+                    },
+                    {
                       "name": "DashCooldown",
                       "type": "int",
                       "value": 20
@@ -291,17 +311,17 @@
                       "type": "float",
                       "value": 0.1
                     },
-                    {
-                      "name": "collider",
-                      "propertytype": "Collider",
-                      "type": "class",
-                      "value": {
-                        "Height": 15,
-                        "Width": 5,
-                        "XOffset": -2,
-                        "YOffset": -7
-                      }
-                    },
+                    //{
+                    //  "name": "collider",
+                    //  "propertytype": "Collider",
+                    //  "type": "class",
+                    //  "value": {
+                    //    "Height": 15,
+                    //    "Width": 5,
+                    //    "XOffset": -2,
+                    //    "YOffset": -7
+                    //  }
+                    //},
                     {
                       "name": "dashTrail0",
                       "propertytype": "Sprite",

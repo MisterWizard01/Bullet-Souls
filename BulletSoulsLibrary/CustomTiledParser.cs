@@ -18,6 +18,10 @@ public class CustomTiledParser : TiledParser
         {
             case "Player":
                 name = obj.Value<string>("name") ?? "";
+                properties.TryGetValue("Width", out object? width);
+                properties.TryGetValue("Height", out object? height);
+                properties.TryGetValue("XOffset", out object? xOffset);
+                properties.TryGetValue("YOffset", out object? yOffset);
                 properties.TryGetValue("Speed", out object? speed);
                 properties.TryGetValue("DashDistance", out object? dashDistance);
                 properties.TryGetValue("DashCooldown", out object? dashCooldown);
@@ -28,6 +32,8 @@ public class CustomTiledParser : TiledParser
                 objectNode = new PlayerNode()
                 {
                     Position = new Vector2(obj.Value<float>("x"), obj.Value<float>("y")),
+                    Width = (float)(width ?? 0),
+                    Height = (float)(height ?? 0),
                     Speed = (float)(speed ?? 0),
                     DashDistance = (float)(dashDistance ?? 0),
                     DashCooldown = (int)(dashCooldown ?? 0),

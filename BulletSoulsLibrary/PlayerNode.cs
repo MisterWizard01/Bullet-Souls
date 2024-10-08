@@ -8,7 +8,7 @@ using MathHelper = Engine.MathHelper;
 
 namespace BulletSoulsLibrary;
 
-public class PlayerNode : Node2D
+public class PlayerNode : ColliderNode
 {
     public enum PlayerStates
     {

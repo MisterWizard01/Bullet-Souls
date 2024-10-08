@@ -135,6 +135,9 @@ public class Game1 : Game
                 enemy.Position += response.Node1Translation;
             } while (collisions.Count > 0);
         }
+
+        List<Collision> enemyCollisions = new List<Collision>();
+
         #endregion
         #region player shooting
         if (_player.Shoot)
@@ -161,48 +164,43 @@ public class Game1 : Game
         #region solid player collisions
         Node2D coupledLeft = null, coupledRight = null, coupledUp = null, coupledDown = null;
         List<Collision> playerCollisions;
-        List<Node2D> hitNodes = new List<Node2D>();
         do
         {
             //get collisions between the player and walls
             playerCollisions = CollisionManager.GetCollisions(_player, _walls);
-            for (int i = 0; i < _enemies.CountChildren; i++)
-            {
-                var collision = CollisionManager.CheckCollision(_player)
-                playerCollisions.Add()
-            }
+            playerCollisions.AddRange(CollisionManager.GetCollisions(_player, _enemies));
             if (playerCollisions.Count == 0)
                 break;
             //find the earliest collision
-            
+            CollisionManager.SortCollisions(playerCollisions);
             //calculate the correct response
             var response = CollisionManager.HandleSolidCollision(playerCollisions[0], 0, 1);
             //using the response, find out if any other nodes would be affected
             Node2D coupling = null;
-            if (response.Node1Translation.X > 0)
+            if (response.Node1Translation.X > 0 || response.Node2Translation.X < 0)
             {
-                coupledLeft = hitNodes[0];
+                coupledLeft = playerCollisions[0].Node2;
                 coupling = coupledRight;
             }
-            else if (response.Node1Translation.X < 0)
+            else if (response.Node1Translation.X < 0 || response.Node2Translation.X > 0)
             {
-                coupledRight = hitNodes[0];
+                coupledRight = playerCollisions[0].Node2;
                 coupling = coupledLeft;
             }
 
-            if (response.Node1Translation.Y > 0)
+            if (response.Node1Translation.Y > 0 || response.Node2Translation.Y < 0)
             {
-                coupledUp = hitNodes[0];
+                coupledUp = playerCollisions[0].Node2;
                 coupling = coupledDown;
             }
-            else if (response.Node1Translation.Y < 0)
+            else if (response.Node1Translation.Y < 0 || response.Node2Translation.Y > 0)
             {
-                coupledUp = hitNodes[0];
+                coupledDown = playerCollisions[0].Node2;
                 coupling = coupledUp;
             }
 
             //see if we're coupled to a wall
-            if (coupling is ColliderNode wall)
+            if (coupling is ColliderNode)
             {
                 //recalculate the response because the player can't move
                 playerCollisions[0].Node2.Position -= response.Node1Translation;
@@ -212,9 +210,13 @@ public class Game1 : Game
                 //move the player and all coupled nodes based on the original collision response
                 _player.Position += response.Node1Translation;
                 _player.Position += response.Node1Velocity * (1 - playerCollisions[0].Time);
-                coupling.Position += response.Node1Translation;
-                coupling.Position += response.Node1Velocity * (1 - playerCollisions[0].Time);
+                if (coupling is not null)
+                {
+                    coupling.Position += response.Node1Translation;
+                    coupling.Position += response.Node1Velocity * (1 - playerCollisions[0].Time);
+                }
             }
+
             if (_player.State == PlayerNode.PlayerStates.Sprint)
                 _player.StopSprinting();
             if (_player.State == PlayerNode.PlayerStates.Slide)
@@ -252,11 +254,11 @@ public class Game1 : Game
 
         _tileLayers.GetChild("Wall Tops").Draw(null, _camera, Vector2.Zero);
 
-        DrawHitbox(_player.GetChild("collider") as ColliderNode, _player.Position, Color.LightBlue);
+        DrawHitbox(_player, Vector2.Zero, Color.LightBlue);
         for (int i = 0; i < _enemies.CountChildren; i++)
         {
             var enemy = _enemies.GetChild(i) as EnemyNode;
-            DrawHitbox(enemy.GetChild("collider") as ColliderNode, enemy.Position, Color.White);
+            DrawHitbox(enemy, Vector2.Zero, Color.White);
         }
 
         _spriteBatch.End();
